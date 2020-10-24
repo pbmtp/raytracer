@@ -49,12 +49,12 @@ impl Vec3 {
 
     // ops
     #[inline]
-    pub fn dot(&self, other: &Vec3) -> f32 {
+    pub fn dot(&self, other: Vec3) -> f32 {
         self.0 * other.0 + self.1 * other.1 + self.2 * other.2
     }
 
     #[inline]
-    pub fn cross(&self, other: &Vec3) -> Vec3 {
+    pub fn cross(&self, other: Vec3) -> Vec3 {
         Vec3::new(
             self.1 * other.2 - self.2 * other.1,
             self.2 * other.0 - self.0 * other.2,
@@ -64,7 +64,7 @@ impl Vec3 {
 
     #[inline]
     pub fn length_squared(self) -> f32 {
-        self.dot(&self)
+        self.dot(self)
     }
 
     #[inline]
@@ -288,7 +288,7 @@ mod tests {
         let v2 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
 
         let dot = v1.0 * v2.0 + v1.1 * v2.1 + v1.2 * v2.2;
-        assert_eq!(v1.dot(&v2), dot);
+        assert_eq!(v1.dot(v2), dot);
     }
 
     #[test]
@@ -296,16 +296,16 @@ mod tests {
         let v1 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
         let v2 = Vec3::new(4.0f32, 5.0f32, 6.0f32);
         let v3 = Vec3::new(-3.0f32, 6.0f32, -3.0f32);
-        assert_eq!(v1.cross(&v2), v3);
+        assert_eq!(v1.cross(v2), v3);
 
         let v1 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
         let v2 = Vec3::new(4.0f32, 5.0f32, 6.0f32);
         let v3 = Vec3::new(3.0f32, -6.0f32, 3.0f32);
-        assert_eq!(v2.cross(&v1), v3);
+        assert_eq!(v2.cross(v1), v3);
 
         let v1 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
         let v2 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
-        assert_eq!(v1.cross(&v2), Vec3::zero());
+        assert_eq!(v1.cross(v2), Vec3::zero());
     }
 
     #[test]

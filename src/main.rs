@@ -6,9 +6,10 @@ extern crate indicatif;
 use image::{ImageBuffer, Rgb};
 use indicatif::ProgressBar;
 
-mod ray;
-mod vec3;
 mod hittable;
+mod ray;
+mod sphere;
+mod vec3;
 
 use ray::Ray;
 use vec3::{Color, Point3, Vec3};
@@ -30,7 +31,7 @@ fn render_simple(name: &str) {
 
         let c = Color::from((
             x as f32 / (WIDTH as f32 - 1f32),
-            y as f32 / (HEIGHT as f32 - 1f32),
+            (HEIGHT - y) as f32 / (HEIGHT as f32 - 1f32),
             0.25f32,
         ));
         *pixel = Rgb(c.to_u8());
@@ -44,10 +45,10 @@ fn render_simple(name: &str) {
 fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> f32 {
     let oc: Vec3 = r.origin() - center;
     let a = r.direction().length_squared();
-    let half_b = oc.dot(&r.direction());
+    let half_b = oc.dot(r.direction());
     let c = oc.length_squared() - radius.powi(2);
     let discriminant = half_b.powi(2) - a * c;
-    
+
     if discriminant < 0.0 {
         -1.0
     } else {
@@ -56,7 +57,7 @@ fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> f32 {
 }
 
 fn ray_color(r: Ray) -> Color {
-    let mut t = hit_sphere(Point3::new(0.0,0.0,-1.0), 0.5, &r);
+    let mut t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &r);
     if t > 0.0f32 {
         let v = r.point_at(t) - Vec3::new(0.0, 0.0, -1.0);
         let n = v.to_unit_vector();
