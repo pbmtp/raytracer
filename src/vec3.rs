@@ -5,6 +5,9 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3(f32, f32, f32);
 
+pub type Point3 = Vec3;
+pub type Color = Vec3;
+
 impl Vec3 {
     // constructors
     #[inline]

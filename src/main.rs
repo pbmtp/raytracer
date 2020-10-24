@@ -8,11 +8,7 @@ use indicatif::ProgressBar;
 
 mod vec3;
 
-use vec3::Vec3;
-
-// type alias
-type Point3 = Vec3;
-type Color = Vec3;
+use vec3::Color;
 
 // Size
 const RATIO: f32 = 16.0 / 9.0;
