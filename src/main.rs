@@ -40,7 +40,21 @@ fn render_simple(name: &str) {
     imgbuf.save(name).unwrap();
 }
 
+fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> bool {
+    let oc: Vec3 = r.origin() - center;
+    let a = r.direction().length_squared();
+    let b = 2.0 * oc.dot(&r.direction());
+    let c = oc.length_squared() - radius.powi(2);
+    let discriminant = b.powi(2) - 4.0 * a * c;
+    
+    return discriminant > 0.0;
+}
+
 fn ray_color(r: Ray) -> Color {
+    if hit_sphere(Point3::new(0.0,0.0,-1.0), 0.5, &r) {
+        return Color::new(1.0, 0.0, 0.0);
+    }
+
     let unit_direction = r.direction().to_unit_vector();
     let t = 0.5f32 * (unit_direction.y() + 1.0f32);
 
