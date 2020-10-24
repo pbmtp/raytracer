@@ -40,23 +40,31 @@ fn render_simple(name: &str) {
     imgbuf.save(name).unwrap();
 }
 
-fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> bool {
+fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> f32 {
     let oc: Vec3 = r.origin() - center;
     let a = r.direction().length_squared();
-    let b = 2.0 * oc.dot(&r.direction());
+    let half_b = oc.dot(&r.direction());
     let c = oc.length_squared() - radius.powi(2);
-    let discriminant = b.powi(2) - 4.0 * a * c;
+    let discriminant = half_b.powi(2) - a * c;
     
-    discriminant > 0.0
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-half_b - discriminant.sqrt()) / a
+    }
 }
 
 fn ray_color(r: Ray) -> Color {
-    if hit_sphere(Point3::new(0.0,0.0,-1.0), 0.5, &r) {
-        return Color::new(1.0, 0.0, 0.0);
+    let mut t = hit_sphere(Point3::new(0.0,0.0,-1.0), 0.5, &r);
+    if t > 0.0f32 {
+        let v = r.point_at(t) - Vec3::new(0.0, 0.0, -1.0);
+        let n = v.to_unit_vector();
+
+        return 0.5 * Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
     }
 
     let unit_direction = r.direction().to_unit_vector();
-    let t = 0.5f32 * (unit_direction.y() + 1.0f32);
+    t = 0.5 * (unit_direction.y() + 1.0);
 
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
