@@ -139,6 +139,14 @@ impl Mul<f32> for Vec3 {
     }
 }
 
+impl Mul<Vec3> for f32 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3::new(self * rhs.0, self * rhs.1, self * rhs.2)
+    }
+}
+
 impl MulAssign<f32> for Vec3 {
     fn mul_assign(&mut self, rhs: f32) {
         self.0 *= rhs;
@@ -298,8 +306,8 @@ mod tests {
     fn test_mul() {
         let v1 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
         let v2 = Vec3::new(2.0f32, 4.0f32, 6.0f32);
-
         assert_eq!(v1 * 2f32, v2);
+        assert_eq!(2f32 * v1, v2);
     }
 
     #[test]
