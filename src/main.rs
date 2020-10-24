@@ -8,6 +8,7 @@ use indicatif::ProgressBar;
 
 mod ray;
 mod vec3;
+mod hittable;
 
 use ray::Ray;
 use vec3::{Color, Point3, Vec3};
