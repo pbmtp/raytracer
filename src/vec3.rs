@@ -86,7 +86,13 @@ impl Vec3 {
         [f32tou8(self.0), f32tou8(self.1), f32tou8(self.2)]
     }
 
-    // TODO to_unit / normalize
+    pub fn to_unit_vector(self) -> Vec3 {
+        let l = self.length();
+
+        Vec3::new(self.0 / l, self.1 / l, self.2 / l)
+    }
+
+    // TODO normalize
 }
 
 impl From<(f32, f32, f32)> for Vec3 {
@@ -263,14 +269,14 @@ mod tests {
     }
 
     #[test]
-    fn test_length() {
+    fn test_length_squared() {
         let v1 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
-        let l2 = 1.0f32 + (2.0f32 * 2.0f32) + (3.0f32 * 3.0f32);
+        let l2 = (1.0f32 * 1.0f32) + (2.0f32 * 2.0f32) + (3.0f32 * 3.0f32);
         assert_eq!(v1.length_squared(), l2);
     }
 
     #[test]
-    fn test_length_squared() {
+    fn test_length() {
         let v1 = Vec3::new(1.0f32, 2.0f32, 3.0f32);
         let l2 = 1.0f32 + (2.0f32 * 2.0f32) + (3.0f32 * 3.0f32);
         assert_eq!(v1.length(), l2.sqrt());
@@ -341,5 +347,14 @@ mod tests {
         let v1 = Vec3::new(0.5f32, -1.0f32, 0.75f32);
         let u1 = [127, 0, 191];
         assert_eq!(v1.to_u8(), u1);
+    }
+
+    #[test]
+    fn test_to_unit_vector() {
+        let v1 = Vec3::new(0.0f32, 4.0f32, 4.0f32);
+        let v2 = Vec3::new(0.0f32, 0.70710677f32, 0.70710677f32);
+
+        let l = v1.length();
+        assert_eq!(v1 / l, v2);
     }
 }
