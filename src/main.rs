@@ -47,7 +47,7 @@ fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> bool {
     let c = oc.length_squared() - radius.powi(2);
     let discriminant = b.powi(2) - 4.0 * a * c;
     
-    return discriminant > 0.0;
+    discriminant > 0.0
 }
 
 fn ray_color(r: Ray) -> Color {
