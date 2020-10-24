@@ -9,5 +9,5 @@ pub struct HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, r: Ray, tmin: f32, tmax: f32) -> Option<HitRecord>;
+    fn hit(&self, r: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord>;
 }
