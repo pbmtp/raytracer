@@ -91,7 +91,7 @@ fn render_with_ray(name: &str) {
         bar.inc(1);
 
         let u = x as f32 / (WIDTH as f32 - 1f32);
-        let v = y as f32 / (HEIGHT as f32 - 1f32);
+        let v = (HEIGHT - y) as f32 / (HEIGHT as f32 - 1f32);
         let r = Ray::new(
             origin,
             lower_left_corner + u * horizontal + v * vertical - origin,
