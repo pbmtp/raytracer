@@ -1,3 +1,4 @@
+#![feature(clamp)]
 #![allow(dead_code)]
 
 extern crate image;

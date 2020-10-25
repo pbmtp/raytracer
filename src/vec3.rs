@@ -72,18 +72,18 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn to_u8(self) -> [u8; 3] {
-        fn f32tou8(f: f32) -> u8 {
-            if f < 0.0f32 {
-                0
-            } else if f >= 1.0f32 {
-                255
-            } else {
-                (255.999f32 * f) as u8
-            }
-        }
+    pub fn clamp(self, min: f32, max: f32) -> Vec3 {
+        Vec3::new(
+            self.0.clamp(min, max),
+            self.1.clamp(min, max),
+            self.2.clamp(min, max),
+        )
+    }
 
-        [f32tou8(self.0), f32tou8(self.1), f32tou8(self.2)]
+    pub fn to_u8(self) -> [u8; 3] {
+        let c = self.clamp(0.0, 1.0) * 255.999f32;
+
+        [c.0 as u8, c.1 as u8, c.2 as u8]
     }
 
     pub fn to_unit_vector(self) -> Vec3 {
@@ -356,5 +356,13 @@ mod tests {
 
         let l = v1.length();
         assert_eq!(v1 / l, v2);
+    }
+
+    #[test]
+    fn test_clamp() {
+        let v1 = Vec3::new(-42.0f32, 0.5f32, 1.1f32);
+        let v2 = Vec3::new(0.0f32, 0.5f32, 1.0f32);
+
+        assert_eq!(v1.clamp(0.0, 1.0), v2);
     }
 }
