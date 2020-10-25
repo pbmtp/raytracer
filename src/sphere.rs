@@ -30,8 +30,9 @@ impl Hittable for Sphere {
                 let p = r.point_at(temp);
                 let outward_normal = (p - self.center) / self.radius;
 
-                let hr = HitRecord::new(p, Vec3::zero(), temp);
+                let mut hr = HitRecord::new(p, Vec3::zero(), temp);
                 hr.set_front_face(&r, outward_normal);
+
                 return Some(hr);
             }
 
@@ -40,8 +41,9 @@ impl Hittable for Sphere {
                 let p = r.point_at(temp);
                 let outward_normal = (p - self.center) / self.radius;
 
-                let hr = HitRecord::new(p, Vec3::zero(), temp);
+                let mut hr = HitRecord::new(p, Vec3::zero(), temp);
                 hr.set_front_face(&r, outward_normal);
+
                 return Some(hr);
             }
         }
