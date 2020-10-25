@@ -2,7 +2,7 @@ use super::hittable::{HitRecord, Hittable};
 use super::ray::Ray;
 use super::vec3::{Point3, Vec3};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Sphere {
     center: Point3,
     radius: f32,

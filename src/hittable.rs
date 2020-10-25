@@ -1,7 +1,7 @@
 use super::ray::Ray;
 use super::vec3::{Point3, Vec3};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct HitRecord {
     p: Point3,
     normal: Vec3,
@@ -28,9 +28,13 @@ impl HitRecord {
         };
     }
 
-    pub fn get_t(self) -> f32 { self.t }
+    pub fn get_t(self) -> f32 {
+        self.t
+    }
 
-    pub fn get_normal(self) -> Vec3 { self.normal }
+    pub fn get_normal(self) -> Vec3 {
+        self.normal
+    }
 }
 
 pub trait Hittable {

@@ -2,7 +2,7 @@ use super::hittable::{HitRecord, Hittable};
 use super::ray::Ray;
 use super::vec3::Vec3;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct HittableList<T> {
     pub objects: Vec<T>,
 }
