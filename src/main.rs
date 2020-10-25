@@ -8,12 +8,14 @@ extern crate indicatif;
 use image::{ImageBuffer, Rgb};
 use indicatif::ProgressBar;
 
+mod camera;
 mod hittable;
 mod hittable_list;
 mod ray;
 mod sphere;
 mod vec3;
 
+use camera::Camera;
 use hittable::Hittable;
 use hittable_list::HittableList;
 use ray::Ray;
@@ -25,6 +27,7 @@ const RATIO: f32 = 16.0 / 9.0;
 const WIDTH: u32 = 800;
 const HEIGHT: u32 = (WIDTH as f32 / RATIO) as u32;
 
+// Chapter 2
 fn render_simple(name: &str) {
     // create image buffer
     let mut imgbuf = ImageBuffer::new(WIDTH, HEIGHT);
@@ -48,6 +51,7 @@ fn render_simple(name: &str) {
     imgbuf.save(name).unwrap();
 }
 
+// Chapter 6.1
 fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> f32 {
     let oc: Vec3 = r.origin() - center;
     let a = r.direction().length_squared();
@@ -115,6 +119,7 @@ fn render_with_ray_one_sphere(name: &str) {
     imgbuf.save(name).unwrap();
 }
 
+// Chapter 6.6
 fn ray_color_world<T: Hittable>(r: &Ray, world: &T) -> Color {
     if let Some(hr) = world.hit(&r, 0.0, std::f32::INFINITY) {
         return 0.5 * (hr.get_normal() + Color::new(1.0, 1.0, 1.0));
@@ -136,15 +141,7 @@ fn render_world(name: &str) {
     world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
 
     // Camera
-    let viewport_height = 2.0f32;
-    let viewport_width = RATIO * viewport_height;
-    let focal_length = 1.0f32;
-
-    let origin = Point3::zero();
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lower_left_corner =
-        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+    let cam = Camera::new(RATIO);
 
     // create image buffer
     let mut imgbuf = ImageBuffer::new(WIDTH, HEIGHT);
@@ -157,10 +154,8 @@ fn render_world(name: &str) {
 
         let u = x as f32 / (WIDTH as f32 - 1f32);
         let v = (HEIGHT - y) as f32 / (HEIGHT as f32 - 1f32);
-        let r = Ray::new(
-            origin,
-            lower_left_corner + u * horizontal + v * vertical - origin,
-        );
+
+        let r = cam.get_ray(u, v);
 
         let c = ray_color_world(&r, &world);
 
