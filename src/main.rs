@@ -3,8 +3,10 @@
 
 extern crate image;
 extern crate indicatif;
+extern crate rand;
 
 // use std::f32::consts::PI;
+use rand::Rng;
 
 use image::{ImageBuffer, Rgb};
 use indicatif::ProgressBar;
@@ -27,6 +29,7 @@ use vec3::{Color, Point3, Vec3};
 const RATIO: f32 = 16.0 / 9.0;
 const WIDTH: u32 = 800;
 const HEIGHT: u32 = (WIDTH as f32 / RATIO) as u32;
+const SAMPLES_PER_PIXEL: u32 = 100;
 
 // Chapter 2
 fn render_simple(name: &str) {
@@ -132,7 +135,7 @@ fn ray_color_world<T: Hittable>(r: &Ray, world: &T) -> Color {
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
 
-fn render_world(name: &str) {
+fn render_world_ch6(name: &str) {
     // World
     let mut world = HittableList {
         objects: Vec::new(),
@@ -168,8 +171,55 @@ fn render_world(name: &str) {
     imgbuf.save(name).unwrap();
 }
 
+// Chapter 7
+fn random_double() -> f32 {
+    let mut rng = rand::thread_rng();
+
+    rng.gen_range(0.0, 1.0)
+}
+
+fn render_world_ch7(name: &str) {
+    // World
+    let mut world = HittableList {
+        objects: Vec::new(),
+    };
+
+    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
+    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
+
+    // Camera
+    let cam = Camera::new(RATIO);
+
+    // create image buffer
+    let mut imgbuf = ImageBuffer::new(WIDTH, HEIGHT);
+
+    // Iterate over the coordinates and pixels of the image
+    let len = WIDTH as u64 * HEIGHT as u64;
+    let bar = ProgressBar::new(len);
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+        bar.inc(1);
+
+        let mut c = Color::zero();
+        for _s in 0..SAMPLES_PER_PIXEL {
+            let u = (x as f32 + random_double()) / (WIDTH as f32 - 1f32);
+            let v = ((HEIGHT - y) as f32 + random_double()) / (HEIGHT as f32 - 1f32);
+
+            let r = cam.get_ray(u, v);
+
+            c += ray_color_world(&r, &world);
+        }
+
+        *pixel = Rgb(c.to_u8_avg(SAMPLES_PER_PIXEL));
+    }
+    bar.finish();
+
+    // write the generated image (format is deduced based on extension)
+    imgbuf.save(name).unwrap();
+}
+
 fn main() {
     // render_simple("out-ch2.png");
     // render_with_ray_one_sphere("out-ch6_1.png");
-    render_world("out-ch6_6.png");
+    // render_world_ch6("out-ch6_6.png");
+    render_world_ch7("out-ch7.png");
 }

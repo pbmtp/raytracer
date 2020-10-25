@@ -86,6 +86,14 @@ impl Vec3 {
         [c.0 as u8, c.1 as u8, c.2 as u8]
     }
 
+    pub fn to_u8_avg(self, samples_per_pixel: u32) -> [u8; 3] {
+        let mut c = self.clone();
+        c /= samples_per_pixel as f32;
+        c = c.clamp(0.0, 1.0) * 255.999f32;
+
+        [c.0 as u8, c.1 as u8, c.2 as u8]
+    }
+
     pub fn to_unit_vector(self) -> Vec3 {
         let l = self.length();
 
