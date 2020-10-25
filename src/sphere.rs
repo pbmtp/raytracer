@@ -5,17 +5,17 @@ use super::vec3::{Point3, Vec3};
 #[derive(Debug, Default)]
 pub struct Sphere {
     center: Point3,
-    radius: f32,
+    radius: f64,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f32) -> Sphere {
+    pub fn new(center: Point3, radius: f64) -> Sphere {
         Sphere { center, radius }
     }
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let oc: Vec3 = r.origin() - self.center;
         let a = r.direction().length_squared();
         let half_b = oc.dot(r.direction());

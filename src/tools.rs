@@ -1,16 +1,16 @@
 use rand::Rng;
 
-use std::f32::consts::PI;
+use std::f64::consts::PI;
 
 use super::vec3::Vec3;
 
-pub fn random_double_range(min: f32, max: f32) -> f32 {
+pub fn random_double_range(min: f64, max: f64) -> f64 {
     let mut rng = rand::thread_rng();
 
     rng.gen_range(min, max)
 }
 
-pub fn random_double() -> f32 {
+pub fn random_double() -> f64 {
     random_double_range(0.0, 1.0)
 }
 
@@ -28,7 +28,7 @@ pub fn random_in_unit_sphere() -> Vec3 {
 pub fn random_unit_vector() -> Vec3 {
     let a = random_double_range(0.0, 2.0 * PI);
     let z = random_double_range(-1.0, 1.0);
-    let r = (1f32 - z * z).sqrt();
+    let r = (1f64 - z * z).sqrt();
 
     Vec3::new(r * a.cos(), r * a.sin(), z)
 }

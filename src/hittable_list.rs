@@ -24,7 +24,7 @@ impl<T: Hittable> HittableList<T> {
 }
 
 impl<T: Hittable> Hittable for HittableList<T> {
-    fn hit(&self, r: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let mut rec = HitRecord::new(Vec3::zero(), Vec3::zero(), 0.0);
         let mut hit_anything = false;
         let mut closest_so_far = tmax;

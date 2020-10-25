@@ -27,9 +27,9 @@ use tools::{random_double, random_in_hemisphere}; // , random_in_unit_sphere, ra
 use vec3::{Color, Point3, Vec3};
 
 // Size
-const RATIO: f32 = 16.0 / 9.0;
+const RATIO: f64 = 16.0 / 9.0;
 const WIDTH: u32 = 800;
-const HEIGHT: u32 = (WIDTH as f32 / RATIO) as u32;
+const HEIGHT: u32 = (WIDTH as f64 / RATIO) as u32;
 const SAMPLES_PER_PIXEL: u32 = 100;
 const MAX_DEPTH: u32 = 50;
 
@@ -45,9 +45,9 @@ fn render_simple(name: &str) {
         bar.inc(1);
 
         let c = Color::from((
-            x as f32 / (WIDTH as f32 - 1f32),
-            (HEIGHT - y) as f32 / (HEIGHT as f32 - 1f32),
-            0.25f32,
+            x as f64 / (WIDTH as f64 - 1f64),
+            (HEIGHT - y) as f64 / (HEIGHT as f64 - 1f64),
+            0.25f64,
         ));
         *pixel = Rgb(c.to_u8());
     }
@@ -58,7 +58,7 @@ fn render_simple(name: &str) {
 }
 
 // Chapter 6.1 https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/shadingwithsurfacenormals
-fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> f32 {
+fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
     let oc: Vec3 = r.origin() - center;
     let a = r.direction().length_squared();
     let half_b = oc.dot(r.direction());
@@ -74,7 +74,7 @@ fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> f32 {
 
 fn ray_color_one_sphere(r: Ray) -> Color {
     let mut t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &r);
-    if t > 0.0f32 {
+    if t > 0.0f64 {
         let v = r.point_at(t) - Vec3::new(0.0, 0.0, -1.0);
         let n = v.to_unit_vector();
 
@@ -89,9 +89,9 @@ fn ray_color_one_sphere(r: Ray) -> Color {
 
 fn render_with_ray_one_sphere(name: &str) {
     // Camera
-    let viewport_height = 2.0f32;
+    let viewport_height = 2.0f64;
     let viewport_width = RATIO * viewport_height;
-    let focal_length = 1.0f32;
+    let focal_length = 1.0f64;
 
     let origin = Point3::zero();
     let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
@@ -108,8 +108,8 @@ fn render_with_ray_one_sphere(name: &str) {
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
         bar.inc(1);
 
-        let u = x as f32 / (WIDTH as f32 - 1f32);
-        let v = (HEIGHT - y) as f32 / (HEIGHT as f32 - 1f32);
+        let u = x as f64 / (WIDTH as f64 - 1f64);
+        let v = (HEIGHT - y) as f64 / (HEIGHT as f64 - 1f64);
         let r = Ray::new(
             origin,
             lower_left_corner + u * horizontal + v * vertical - origin,
@@ -127,7 +127,7 @@ fn render_with_ray_one_sphere(name: &str) {
 
 // Chapter 6.6 https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/somenewc++features
 fn ray_color_world<T: Hittable>(r: &Ray, world: &T) -> Color {
-    if let Some(hr) = world.hit(&r, 0.0, std::f32::INFINITY) {
+    if let Some(hr) = world.hit(&r, 0.0, std::f64::INFINITY) {
         return 0.5 * (hr.get_normal() + Color::new(1.0, 1.0, 1.0));
     }
 
@@ -158,8 +158,8 @@ fn render_world_ch6(name: &str) {
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
         bar.inc(1);
 
-        let u = x as f32 / (WIDTH as f32 - 1f32);
-        let v = (HEIGHT - y) as f32 / (HEIGHT as f32 - 1f32);
+        let u = x as f64 / (WIDTH as f64 - 1f64);
+        let v = (HEIGHT - y) as f64 / (HEIGHT as f64 - 1f64);
 
         let r = cam.get_ray(u, v);
 
@@ -197,8 +197,8 @@ fn render_world_ch7(name: &str) {
 
         let mut c = Color::zero();
         for _s in 0..SAMPLES_PER_PIXEL {
-            let u = (x as f32 + random_double()) / (WIDTH as f32 - 1f32);
-            let v = ((HEIGHT - y) as f32 + random_double()) / (HEIGHT as f32 - 1f32);
+            let u = (x as f64 + random_double()) / (WIDTH as f64 - 1f64);
+            let v = ((HEIGHT - y) as f64 + random_double()) / (HEIGHT as f64 - 1f64);
 
             let r = cam.get_ray(u, v);
 
@@ -220,7 +220,7 @@ fn ray_color_depth<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
         return Color::zero();
     }
 
-    if let Some(hr) = world.hit(&r, 0.001, std::f32::INFINITY) {
+    if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
         // ch 8.2
         // let target = hr.get_p() + hr.get_normal() + random_in_unit_sphere();
 
@@ -261,8 +261,8 @@ fn render_world_ch8(name: &str) {
 
         let mut c = Color::zero();
         for _s in 0..SAMPLES_PER_PIXEL {
-            let u = (x as f32 + random_double()) / (WIDTH as f32 - 1f32);
-            let v = ((HEIGHT - y) as f32 + random_double()) / (HEIGHT as f32 - 1f32);
+            let u = (x as f64 + random_double()) / (WIDTH as f64 - 1f64);
+            let v = ((HEIGHT - y) as f64 + random_double()) / (HEIGHT as f64 - 1f64);
 
             let r = cam.get_ray(u, v);
 

@@ -5,12 +5,12 @@ use super::vec3::{Point3, Vec3};
 pub struct HitRecord {
     p: Point3,
     normal: Vec3,
-    t: f32,
+    t: f64,
     front_face: bool,
 }
 
 impl HitRecord {
-    pub fn new(p: Point3, normal: Vec3, t: f32) -> HitRecord {
+    pub fn new(p: Point3, normal: Vec3, t: f64) -> HitRecord {
         HitRecord {
             p,
             normal,
@@ -36,11 +36,11 @@ impl HitRecord {
         self.normal
     }
 
-    pub fn get_t(self) -> f32 {
+    pub fn get_t(self) -> f64 {
         self.t
     }
 }
 
 pub trait Hittable {
-    fn hit(&self, r: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord>;
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
 }
