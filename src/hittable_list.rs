@@ -1,6 +1,6 @@
-use super::hittable::{HitRecord, Hittable};
-use super::ray::Ray;
-use super::vec3::Vec3;
+use crate::hittable::{HitRecord, Hittable};
+use crate::ray::Ray;
+use crate::vec3::Vec3;
 
 #[derive(Debug, Default)]
 pub struct HittableList<T> {

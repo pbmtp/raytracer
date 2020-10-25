@@ -2,7 +2,7 @@ use rand::Rng;
 
 use std::f64::consts::PI;
 
-use super::vec3::Vec3;
+use crate::vec3::Vec3;
 
 pub fn random_double_range(min: f64, max: f64) -> f64 {
     let mut rng = rand::thread_rng();

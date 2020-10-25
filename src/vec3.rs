@@ -2,7 +2,7 @@
 
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use super::tools::{random_double, random_double_range};
+use crate::tools::{random_double, random_double_range};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3(f64, f64, f64);
