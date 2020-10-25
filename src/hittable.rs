@@ -28,12 +28,16 @@ impl HitRecord {
         };
     }
 
-    pub fn get_t(self) -> f32 {
-        self.t
+    pub fn get_p(self) -> Point3 {
+        self.p
     }
 
     pub fn get_normal(self) -> Vec3 {
         self.normal
+    }
+
+    pub fn get_t(self) -> f32 {
+        self.t
     }
 }
 

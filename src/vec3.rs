@@ -2,6 +2,8 @@
 
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+use super::tools::{random_double, random_double_range};
+
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3(f32, f32, f32);
 
@@ -18,6 +20,20 @@ impl Vec3 {
     #[inline]
     pub fn new(r: f32, g: f32, b: f32) -> Vec3 {
         Vec3(r, g, b)
+    }
+
+    #[inline]
+    pub fn random() -> Vec3 {
+        Vec3(random_double(), random_double(), random_double())
+    }
+
+    #[inline]
+    pub fn random_range(min: f32, max: f32) -> Vec3 {
+        Vec3(
+            random_double_range(min, max),
+            random_double_range(min, max),
+            random_double_range(min, max),
+        )
     }
 
     // getters
@@ -89,9 +105,20 @@ impl Vec3 {
     pub fn to_u8_avg(self, samples_per_pixel: u32) -> [u8; 3] {
         let mut c = self.clone();
         c /= samples_per_pixel as f32;
-        c = c.clamp(0.0, 1.0) * 255.999f32;
+        c = c.clamp(0.0, 0.999) * 256f32;
 
         [c.0 as u8, c.1 as u8, c.2 as u8]
+    }
+
+    pub fn to_u8_avg_gamma2(self, samples_per_pixel: u32) -> [u8; 3] {
+        let mut c = self.clone();
+        c /= samples_per_pixel as f32;
+
+        let r = c.0.sqrt().clamp(0.0, 0.999) * 256f32;
+        let g = c.1.sqrt().clamp(0.0, 0.999) * 256f32;
+        let b = c.2.sqrt().clamp(0.0, 0.999) * 256f32;
+
+        [r as u8, g as u8, b as u8]
     }
 
     pub fn to_unit_vector(self) -> Vec3 {
