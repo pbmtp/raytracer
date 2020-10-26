@@ -143,8 +143,14 @@ fn render_world_ch6(name: &str) {
         objects: Vec::new(),
     };
 
-    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
-    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
+    world.add(Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+    });
+    world.add(Sphere {
+        center: Point3::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+    });
 
     // Camera
     let cam = Camera::new(RATIO);
@@ -180,8 +186,14 @@ fn render_world_ch7(name: &str) {
         objects: Vec::new(),
     };
 
-    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
-    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
+    world.add(Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+    });
+    world.add(Sphere {
+        center: Point3::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+    });
 
     // Camera
     let cam = Camera::new(RATIO);
@@ -244,8 +256,14 @@ fn render_world_ch8(name: &str) {
         objects: Vec::new(),
     };
 
-    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
-    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
+    world.add(Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+    });
+    world.add(Sphere {
+        center: Point3::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+    });
 
     // Camera
     let cam = Camera::new(RATIO);

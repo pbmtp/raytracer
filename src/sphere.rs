@@ -4,14 +4,8 @@ use crate::vec3::{Point3, Vec3};
 
 #[derive(Debug, Default)]
 pub struct Sphere {
-    center: Point3,
-    radius: f64,
-}
-
-impl Sphere {
-    pub fn new(center: Point3, radius: f64) -> Sphere {
-        Sphere { center, radius }
-    }
+    pub center: Point3,
+    pub radius: f64,
 }
 
 impl Hittable for Sphere {
