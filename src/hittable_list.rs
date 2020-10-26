@@ -1,6 +1,5 @@
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
-use crate::vec3::Vec3;
 
 #[derive(Debug, Default)]
 pub struct HittableList<T> {
@@ -25,21 +24,16 @@ impl<T: Hittable> HittableList<T> {
 
 impl<T: Hittable> Hittable for HittableList<T> {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
-        let mut rec = HitRecord::new(Vec3::zero(), Vec3::zero(), 0.0);
-        let mut hit_anything = false;
+        let mut closest = None;
         let mut closest_so_far = tmax;
 
         for obj in self.objects.iter() {
             if let Some(hr) = obj.hit(r, tmin, closest_so_far) {
-                hit_anything = true;
                 closest_so_far = hr.get_t();
-                rec = hr;
+                closest = Some(hr);
             }
         }
-        if hit_anything {
-            Some(rec)
-        } else {
-            None
-        }
+
+        closest
     }
 }
