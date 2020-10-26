@@ -3,13 +3,13 @@ use crate::ray::Ray;
 
 #[derive(Debug, Default)]
 pub struct HittableList<T> {
-    pub objects: Vec<T>,
+    pub objects: Vec<Box<T>>,
 }
 
 impl<T: Hittable> HittableList<T> {
     pub fn new(object: T) -> HittableList<T> {
         HittableList::<T> {
-            objects: vec![object],
+            objects: vec![Box::new(object)],
         }
     }
 
@@ -18,12 +18,12 @@ impl<T: Hittable> HittableList<T> {
     }
 
     pub fn add(&mut self, object: T) {
-        self.objects.push(object);
+        self.objects.push(Box::new(object));
     }
 }
 
 impl<T: Hittable> Hittable for HittableList<T> {
-    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
+        fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let mut closest = None;
         let mut closest_so_far = tmax;
 
