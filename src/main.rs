@@ -221,13 +221,13 @@ fn ray_color_depth<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     }
 
     if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
-        // ch 8.2
+        // ch 8.2 Simple Diffuse
         // let target = hr.get_p() + hr.get_normal() + random_in_unit_sphere();
 
-        // ch 8.5
+        // ch 8.5 True Lambertian Reflection
         // let target = hr.get_p() + hr.get_normal() + random_unit_vector();
 
-        // ch 8.6
+        // ch 8.6 Alternative Diffuse Formulation
         let target = hr.get_p() + random_in_hemisphere(&hr.get_normal());
         return 0.5 * ray_color_depth(&Ray::new(hr.get_p(), target - hr.get_p()), world, depth - 1);
     }
