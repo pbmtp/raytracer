@@ -65,8 +65,8 @@ fn render_world_ch9(name: &str) {
 
     let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
     let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
-    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8));
-    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2));
+    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
+    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
 
     world.add(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
@@ -122,5 +122,5 @@ fn render_world_ch9(name: &str) {
 fn main() {
     render_world_ch9("out-ch9.png");
 
-    // TODO 9 https://raytracing.github.io/books/RayTracingInOneWeekend.html#metal/fuzzyreflection
+    // TODO 10 https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics
 }
