@@ -13,6 +13,7 @@ use indicatif::ProgressBar;
 mod camera;
 mod hittable;
 mod hittable_list;
+mod materials;
 mod ray;
 mod sphere;
 mod tools;
@@ -21,10 +22,11 @@ mod vec3;
 use camera::Camera;
 use hittable::Hittable;
 use hittable_list::HittableList;
+use materials::{Lambertian, Metal};
 use ray::Ray;
 use sphere::Sphere;
 use tools::random_double;
-use vec3::{Color, Point3, Vec3};
+use vec3::{Color, Point3};
 
 // Size
 const RATIO: f64 = 16.0 / 9.0;
@@ -33,24 +35,20 @@ const HEIGHT: u32 = (WIDTH as f64 / RATIO) as u32;
 const SAMPLES_PER_PIXEL: u32 = 100;
 const MAX_DEPTH: u32 = 50;
 
-// Chapter 8 https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials
-fn ray_color_depth<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
+// Chapter 9 https://raytracing.github.io/books/RayTracingInOneWeekend.html#metal
+fn ray_color_ch9<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if depth == 0 {
         return Color::zero();
     }
 
     if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
-        // ch 8.2 Simple Diffuse
-        // let target = hr.get_p() + hr.get_normal() + Vec3::random_in_unit_sphere();
+        let scatter = hr.material.scatter(&r, &hr);
+        if let Some(r) = scatter.scattered {
+            return scatter.attenuation * ray_color_ch9(&r, world, depth - 1);
+        }
 
-        // ch 8.5 True Lambertian Reflection
-        // let target = hr.get_p() + hr.get_normal() + Vec3::random_unit_vector();
-
-        // ch 8.6 Alternative Diffuse Formulation
-        let target = hr.get_p() + Vec3::random_in_hemisphere(&hr.get_normal());
-
-        return 0.5 * ray_color_depth(&Ray::new(hr.get_p(), target - hr.get_p()), world, depth - 1);
+        return Color::zero();
     }
 
     let unit_direction = r.direction().to_unit_vector();
@@ -65,13 +63,30 @@ fn render_world_ch9(name: &str) {
         objects: Vec::new(),
     };
 
-    world.add(Sphere {
-        center: Point3::new(0.0, 0.0, -1.0),
-        radius: 0.5,
-    });
+    let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
+    let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8));
+    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2));
+
     world.add(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
+        material: Box::new(material_ground),
+    });
+    world.add(Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+        material: Box::new(material_center),
+    });
+    world.add(Sphere {
+        center: Point3::new(-1.0, 0.0, -1.0),
+        radius: 0.5,
+        material: Box::new(material_left),
+    });
+    world.add(Sphere {
+        center: Point3::new(1.0, 0.0, -1.0),
+        radius: 0.5,
+        material: Box::new(material_right),
     });
 
     // Camera
@@ -93,7 +108,7 @@ fn render_world_ch9(name: &str) {
 
             let r = cam.get_ray(u, v);
 
-            c += ray_color_depth(&r, &world, MAX_DEPTH);
+            c += ray_color_ch9(&r, &world, MAX_DEPTH);
         }
 
         *pixel = Rgb(c.to_u8_avg_gamma2(SAMPLES_PER_PIXEL));
@@ -107,5 +122,5 @@ fn render_world_ch9(name: &str) {
 fn main() {
     render_world_ch9("out-ch9.png");
 
-    // TODO 9 https://raytracing.github.io/books/RayTracingInOneWeekend.html#metal
+    // TODO 9 https://raytracing.github.io/books/RayTracingInOneWeekend.html#metal/fuzzyreflection
 }
