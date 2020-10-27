@@ -23,8 +23,8 @@ use hittable::Hittable;
 use hittable_list::HittableList;
 use ray::Ray;
 use sphere::Sphere;
-use tools::{random_double, random_in_hemisphere}; // , random_in_unit_sphere, random_unit_vector};
-use vec3::{Color, Point3};
+use tools::random_double;
+use vec3::{Color, Point3, Vec3};
 
 // Size
 const RATIO: f64 = 16.0 / 9.0;
@@ -42,13 +42,14 @@ fn ray_color_depth<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
 
     if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
         // ch 8.2 Simple Diffuse
-        // let target = hr.get_p() + hr.get_normal() + random_in_unit_sphere();
+        // let target = hr.get_p() + hr.get_normal() + Vec3::random_in_unit_sphere();
 
         // ch 8.5 True Lambertian Reflection
-        // let target = hr.get_p() + hr.get_normal() + random_unit_vector();
+        // let target = hr.get_p() + hr.get_normal() + Vec3::random_unit_vector();
 
         // ch 8.6 Alternative Diffuse Formulation
-        let target = hr.get_p() + random_in_hemisphere(&hr.get_normal());
+        let target = hr.get_p() + Vec3::random_in_hemisphere(&hr.get_normal());
+
         return 0.5 * ray_color_depth(&Ray::new(hr.get_p(), target - hr.get_p()), world, depth - 1);
     }
 
