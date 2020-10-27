@@ -156,6 +156,10 @@ impl Vec3 {
         Vec3::new(self.0 / l, self.1 / l, self.2 / l)
     }
 
+    pub fn reflect(self, n: &Vec3) -> Vec3 {
+        self - 2.0 * self.dot(*n) * *n
+    }
+
     // TODO normalize
 }
 
