@@ -205,6 +205,14 @@ impl Neg for Vec3 {
     }
 }
 
+impl Mul for Vec3 {
+    type Output = Self;
+  
+    fn mul(self, other: Vec3) -> Vec3 {
+      Vec3::new(self.0 * other.0, self.1 * other.1, self.2 * other.2)
+    }
+}
+
 impl Mul<f64> for Vec3 {
     type Output = Self;
 
@@ -378,6 +386,16 @@ mod tests {
 
     #[test]
     fn test_mul() {
+        let v1 = Vec3::new(1.0f64, 2.0f64, 3.0f64);
+        let v2 = Vec3::new(2.0f64, 4.0f64, 6.0f64);
+        let v3 = Vec3::new(2.0f64, 8.0f64, 18.0f64);
+        
+        assert_eq!(v1 * v2, v3);
+        assert_eq!(v2 * v1, v3);
+    }
+
+    #[test]
+    fn test_mul_f64() {
         let v1 = Vec3::new(1.0f64, 2.0f64, 3.0f64);
         let v2 = Vec3::new(2.0f64, 4.0f64, 6.0f64);
         assert_eq!(v1 * 2f64, v2);
