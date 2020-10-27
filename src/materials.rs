@@ -4,8 +4,8 @@ use crate::vec3::{Color, Vec3};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Scatter {
-    attenuation: Color,
-    scattered: Option<Ray>,
+    pub attenuation: Color,
+    pub scattered: Option<Ray>,
 }
 
 pub trait Material {
