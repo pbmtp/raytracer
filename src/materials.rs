@@ -1,7 +1,6 @@
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::tools::random_in_hemisphere; // random_unit_vector
-use crate::vec3::Color;
+use crate::vec3::{Color, Vec3};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Scatter {
@@ -25,9 +24,9 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
-        // let scatter_direction = hr.get_normal() + random_unit_vector();
-        let scatter_direction = random_in_hemisphere(&hr.get_normal());
+    fn scatter(&self, _ray: &Ray, hr: &HitRecord) -> Scatter {
+        // let scatter_direction = hr.get_normal() + Vec3::random_unit_vector();
+        let scatter_direction = Vec3::random_in_hemisphere(&hr.get_normal());
 
         Scatter {
             attenuation: self.albedo,
@@ -49,9 +48,8 @@ impl Metal {
 
 impl Material for Metal {
     fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
-        let reflected = Vec3::unit_vector(ray.direction()).reflect(hr.get_normal());
-        let attenuation = albedo;
-        let scattered = Ray::new(rec.p, reflected);
+        let reflected = ray.direction().reflect(&hr.get_normal());
+        let scattered = Ray::new(hr.get_p(), reflected);
 
         Scatter {
             attenuation: self.albedo,
