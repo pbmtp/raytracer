@@ -98,13 +98,13 @@ fn render_world(name: &str) {
     });
 
     // Camera
-    let cam = Camera::new(
-        Point3::new(-2.0, 2.0, 1.0),
-        Point3::new(0.0, 0.0, -1.1),
-        Vec3::new(0.0, 1.0, 0.0),
-        20.0,
-        RATIO,
-    );
+    let lookfrom = Point3::new(3.0, 3.0, 2.0);
+    let lookat = Point3::new(0.0, 0.0, -1.1);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let aperture = 2.0;
+    let dist_to_focus = (lookfrom - lookat).length();
+
+    let cam = Camera::new(lookfrom, lookat, vup, 20.0, RATIO, aperture, dist_to_focus);
 
     // create image buffer
     let mut imgbuf = ImageBuffer::new(WIDTH, HEIGHT);
@@ -134,9 +134,9 @@ fn render_world(name: &str) {
 }
 
 fn main() {
-    render_world("out-ch11.png");
+    render_world("out-ch12.png");
 
     // DONE 11 https://raytracing.github.io/books/RayTracingInOneWeekend.html#positionablecamera
-    // TODO 12 https://raytracing.github.io/books/RayTracingInOneWeekend.html#defocusblur
+    // DONE 12 https://raytracing.github.io/books/RayTracingInOneWeekend.html#defocusblur
     // TODO 13 https://raytracing.github.io/books/RayTracingInOneWeekend.html#wherenext?
 }
