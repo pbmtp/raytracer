@@ -156,8 +156,16 @@ impl Vec3 {
         Vec3::new(self.0 / l, self.1 / l, self.2 / l)
     }
 
-    pub fn reflect(self, n: &Vec3) -> Vec3 {
-        self - 2.0 * self.dot(*n) * *n
+    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+        *v - 2.0 * v.dot(*n) * *n
+    }
+
+    pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
+        let cos_theta = -uv.dot(*n);
+        let r_out_perp = etai_over_etat * (*uv + cos_theta * *n);
+        let r_out_parallel = -(1.0 - r_out_perp.length_squared()).abs().sqrt() * *n;
+
+        r_out_perp + r_out_parallel
     }
 
     // TODO normalize
@@ -207,9 +215,9 @@ impl Neg for Vec3 {
 
 impl Mul for Vec3 {
     type Output = Self;
-  
+
     fn mul(self, other: Vec3) -> Vec3 {
-      Vec3::new(self.0 * other.0, self.1 * other.1, self.2 * other.2)
+        Vec3::new(self.0 * other.0, self.1 * other.1, self.2 * other.2)
     }
 }
 
@@ -389,7 +397,7 @@ mod tests {
         let v1 = Vec3::new(1.0f64, 2.0f64, 3.0f64);
         let v2 = Vec3::new(2.0f64, 4.0f64, 6.0f64);
         let v3 = Vec3::new(2.0f64, 8.0f64, 18.0f64);
-        
+
         assert_eq!(v1 * v2, v3);
         assert_eq!(v2 * v1, v3);
     }

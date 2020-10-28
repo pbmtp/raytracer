@@ -31,6 +31,10 @@ impl<'a> HitRecord<'a> {
         };
     }
 
+    pub fn is_front(self) -> bool {
+        self.front_face
+    }
+
     pub fn get_p(self) -> Point3 {
         self.p
     }

@@ -22,7 +22,7 @@ mod vec3;
 use camera::Camera;
 use hittable::Hittable;
 use hittable_list::HittableList;
-use materials::{Lambertian, Metal};
+use materials::{Dielectric, Lambertian, Metal};
 use ray::Ray;
 use sphere::Sphere;
 use tools::random_double;
@@ -35,8 +35,8 @@ const HEIGHT: u32 = (WIDTH as f64 / RATIO) as u32;
 const SAMPLES_PER_PIXEL: u32 = 100;
 const MAX_DEPTH: u32 = 50;
 
-// Chapter 9 https://raytracing.github.io/books/RayTracingInOneWeekend.html#metal
-fn ray_color_ch9<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
+// Chapter 10 https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics
+fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if depth == 0 {
         return Color::zero();
@@ -45,7 +45,7 @@ fn ray_color_ch9<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
         let scatter = hr.material.scatter(&r, &hr);
         if let Some(r) = scatter.scattered {
-            return scatter.attenuation * ray_color_ch9(&r, world, depth - 1);
+            return scatter.attenuation * ray_color(&r, world, depth - 1);
         }
 
         return Color::zero();
@@ -57,16 +57,19 @@ fn ray_color_ch9<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
 
-fn render_world_ch9(name: &str) {
+fn render_world(name: &str) {
     // World
     let mut world = HittableList {
         objects: Vec::new(),
     };
 
     let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
-    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
-    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
+    // let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    // let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
+    let material_center = Lambertian::new(Color::new(0.1, 0.2, 0.5));
+    let material_left = Dielectric::new(1.5);
+    let material_left2 = Dielectric::new(1.5);
+    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 0.0);
 
     world.add(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
@@ -82,6 +85,11 @@ fn render_world_ch9(name: &str) {
         center: Point3::new(-1.0, 0.0, -1.0),
         radius: 0.5,
         material: Box::new(material_left),
+    });
+    world.add(Sphere {
+        center: Point3::new(-1.0, 0.0, -1.0),
+        radius: -0.4,
+        material: Box::new(material_left2),
     });
     world.add(Sphere {
         center: Point3::new(1.0, 0.0, -1.0),
@@ -108,7 +116,7 @@ fn render_world_ch9(name: &str) {
 
             let r = cam.get_ray(u, v);
 
-            c += ray_color_ch9(&r, &world, MAX_DEPTH);
+            c += ray_color(&r, &world, MAX_DEPTH);
         }
 
         *pixel = Rgb(c.to_u8_avg_gamma2(SAMPLES_PER_PIXEL));
@@ -120,7 +128,7 @@ fn render_world_ch9(name: &str) {
 }
 
 fn main() {
-    render_world_ch9("out-ch9.png");
+    render_world("out-ch10.png");
 
-    // TODO 10 https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics
+    // TODO 11 https://raytracing.github.io/books/RayTracingInOneWeekend.html#positionablecamera
 }
