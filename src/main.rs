@@ -9,6 +9,7 @@ extern crate rand;
 
 use image::{ImageBuffer, Rgb};
 use indicatif::ProgressBar;
+// use std::f64::consts::PI;
 
 mod camera;
 mod hittable;
@@ -26,7 +27,7 @@ use materials::{Dielectric, Lambertian, Metal};
 use ray::Ray;
 use sphere::Sphere;
 use tools::random_double;
-use vec3::{Color, Point3};
+use vec3::{Color, Point3, Vec3};
 
 // Size
 const RATIO: f64 = 16.0 / 9.0;
@@ -35,7 +36,6 @@ const HEIGHT: u32 = (WIDTH as f64 / RATIO) as u32;
 const SAMPLES_PER_PIXEL: u32 = 100;
 const MAX_DEPTH: u32 = 50;
 
-// Chapter 10 https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics
 fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if depth == 0 {
@@ -98,7 +98,13 @@ fn render_world(name: &str) {
     });
 
     // Camera
-    let cam = Camera::new(RATIO);
+    let cam = Camera::new(
+        Point3::new(-2.0, 2.0, 1.0),
+        Point3::new(0.0, 0.0, -1.1),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        RATIO,
+    );
 
     // create image buffer
     let mut imgbuf = ImageBuffer::new(WIDTH, HEIGHT);
@@ -128,7 +134,9 @@ fn render_world(name: &str) {
 }
 
 fn main() {
-    render_world("out-ch10.png");
+    render_world("out-ch11.png");
 
-    // TODO 11 https://raytracing.github.io/books/RayTracingInOneWeekend.html#positionablecamera
+    // DONE 11 https://raytracing.github.io/books/RayTracingInOneWeekend.html#positionablecamera
+    // TODO 12 https://raytracing.github.io/books/RayTracingInOneWeekend.html#defocusblur
+    // TODO 13 https://raytracing.github.io/books/RayTracingInOneWeekend.html#wherenext?
 }
