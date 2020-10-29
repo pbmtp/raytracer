@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use std::f64::consts::PI;
+use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::tools::{random_double, random_double_range};
@@ -258,6 +259,19 @@ impl DivAssign<f64> for Vec3 {
         self.0 /= rhs;
         self.1 /= rhs;
         self.2 /= rhs;
+    }
+}
+
+impl<'a> Sum<&'a Self> for Vec3 {
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        iter.fold(Self::new(0.0, 0.0, 0.0), |a, b| Self::new(
+             a.0 + b.0,
+             a.1 + b.1,
+             a.2 + b.2,
+        ))
     }
 }
 
