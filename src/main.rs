@@ -8,11 +8,9 @@ extern crate indicatif;
 extern crate rand;
 extern crate rayon;
 
-use image::{ImageBuffer, Rgb};
 use indicatif::{HumanDuration, ProgressBar};
 use rayon::prelude::*;
 
-// use std::f64::consts::PI;
 use std::time::Instant;
 
 mod camera;
@@ -180,7 +178,7 @@ fn random_scene() -> HittableList<Sphere> {
     world
 }
 
-fn render_world(cfg: &Config, name: &str) {
+fn render(cfg: &Config, name: &str) {
     // World
     let world = if cfg.quality {
         random_scene()
@@ -205,43 +203,63 @@ fn render_world(cfg: &Config, name: &str) {
         dist_to_focus,
     );
 
-    // create image buffer
-    let mut imgbuf = ImageBuffer::new(cfg.width, cfg.height);
-
     // Iterate over the coordinates and pixels of the image
-    let len = cfg.width as u64 * cfg.height as u64;
-    let bar = ProgressBar::new(len);
-    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-        bar.inc(1);
+    let width = cfg.width;
+    let height = cfg.height;
+    let samples_per_pixel = cfg.samples_per_pixel;
+    let max_depth = cfg.max_depth;
 
-        let c: Color = (0..cfg.samples_per_pixel)
-            .into_par_iter()
-            .map(|_| {
-                let u = (x as f64 + random_double()) / (cfg.width as f64 - 1f64);
-                let v = ((cfg.height - y) as f64 + random_double()) / (cfg.height as f64 - 1f64);
+    let len = width * height * cfg.bytes_per_pixel;
+    // https://github.com/rust-lang/rust/issues/54628
+    let mut pixels = vec![0u8; len];
+
+    // FIXME https://docs.rs/indicatif/0.15.0/indicatif/#iterators
+    let bar = ProgressBar::new(width as u64 * height as u64);
+    pixels
+        .par_chunks_mut(3)
+        .into_par_iter()
+        .rev()
+        .enumerate()
+        .for_each(|(idx, pixel)| {
+            let y = idx / width;
+            let x = width - (idx % width);
+
+            let mut c = Color::zero();
+            for _s in 0..samples_per_pixel {
+                let u = (x as f64 + random_double()) / (width as f64 - 1f64);
+                let v = (y as f64 + random_double()) / (height as f64 - 1f64);
 
                 let r = cam.get_ray(u, v);
 
-                ray_color(&r, &world, cfg.max_depth)
-            })
-            .collect::<Vec<Color>>()
-            .iter()
-            .sum();
+                c += ray_color(&r, &world, max_depth);
+            }
 
-        *pixel = Rgb(c.to_u8_avg_gamma2(cfg.samples_per_pixel));
-    }
+            let avg = c.to_u8_avg_gamma2(samples_per_pixel);
+            pixel[0] = avg[0];
+            pixel[1] = avg[1];
+            pixel[2] = avg[2];
+
+            bar.inc(1);
+        });
     bar.finish();
 
     // write the generated image (format is deduced based on extension)
-    imgbuf.save(name).unwrap();
+    image::save_buffer(
+        name,
+        pixels.as_slice(),
+        width as u32,
+        height as u32,
+        image::ColorType::Rgb8,
+    )
+    .unwrap();
 }
 
 fn main() {
-    let cfg = Config::speed();
-    // let cfg = Config::quality();
+    // let cfg = Config::speed();
+    let cfg = Config::quality();
 
     let start = Instant::now();
-    render_world(&cfg, "out-test.png");
+    render(&cfg, "out-test.png");
     println!(
         "Time elapsed rendering  scene is: {}",
         HumanDuration(start.elapsed())

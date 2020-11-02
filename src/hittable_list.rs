@@ -2,7 +2,10 @@ use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 
 #[derive(Debug, Default)]
-pub struct HittableList<T> {
+pub struct HittableList<T>
+where
+    T: Hittable,
+{
     pub objects: Vec<Box<T>>,
 }
 
@@ -23,7 +26,7 @@ impl<T: Hittable> HittableList<T> {
 }
 
 impl<T: Hittable> Hittable for HittableList<T> {
-        fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let mut closest = None;
         let mut closest_so_far = tmax;
 
