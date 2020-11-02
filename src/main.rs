@@ -13,6 +13,7 @@ use rayon::prelude::*;
 
 use std::time::Instant;
 
+mod aabb;
 mod camera;
 mod config;
 mod hittable;
