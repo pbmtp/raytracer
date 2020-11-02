@@ -259,3 +259,105 @@ fn render_world_ch8(name: &str) {
     // write the generated image (format is deduced based on extension)
     imgbuf.save(name).unwrap();
 }
+
+fn render(cfg: &Config, name: &str) {
+    // World
+    let world = if cfg.quality {
+        random_scene()
+    } else {
+        simple_scene()
+    };
+
+    // Camera
+    let lookfrom = Point3::new(13.0, 2.0, 3.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
+
+    let cam = Camera::new(
+        lookfrom,
+        lookat,
+        vup,
+        20.0,
+        cfg.ratio,
+        aperture,
+        dist_to_focus,
+    );
+
+    // create image buffer
+    let mut imgbuf = ImageBuffer::new(cfg.width, cfg.height);
+
+    // Iterate over the coordinates and pixels of the image
+    let len = cfg.width as u64 * cfg.height as u64;
+    let bar = ProgressBar::new(len);
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+        bar.inc(1);
+
+        let c: Color = (0..cfg.samples_per_pixel)
+            .into_par_iter()
+            .map(|_| {
+                let u = (x as f64 + random_double()) / (cfg.width as f64 - 1f64);
+                let v = ((cfg.height - y) as f64 + random_double()) / (cfg.height as f64 - 1f64);
+
+                let r = cam.get_ray(u, v);
+
+                ray_color(&r, &world, cfg.max_depth)
+            })
+            .collect::<Vec<Color>>()
+            .iter()
+            .sum();
+
+        *pixel = Rgb(c.to_u8_avg_gamma2(cfg.samples_per_pixel));
+    }
+    bar.finish();
+
+    // write the generated image (format is deduced based on extension)
+    imgbuf.save(name).unwrap();
+}
+
+/*
+// let bar = &Box::new(ProgressBar::new(len));
+let pixels: Vec<u8> = (0..height)
+    .into_iter()
+    .rev()
+    .flat_map(|y| {
+        (0..width).into_iter().flat_map(move |x| {
+            let mut c = Color::zero();
+            for _s in 0..samples_per_pixel {
+                let u = (x as f64 + random_double()) / (width as f64 - 1f64);
+                let v = (y as f64 + random_double()) / (height as f64 - 1f64);
+
+                let r = cam.get_ray(u, v);
+
+                c += ray_color(&r, &*world, max_depth);
+            }
+
+            if x % 64 == 0 {
+                // bar.inc(1);
+            }
+
+            let ca = c.to_u8_avg_gamma2(samples_per_pixel);
+
+            vec![ca[0], ca[1], ca[2]]
+        })
+    })
+    .collect();
+// bar.finish();
+*/
+
+impl Hittable for Vec<Box<dyn Hittable + Sync>> {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
+        let mut closest = None;
+        let mut closest_so_far = tmax;
+
+        for obj in self.iter() {
+            if let Some(hr) = obj.hit(r, tmin, closest_so_far) {
+                closest_so_far = hr.get_t();
+                closest = Some(hr);
+            }
+        }
+
+        closest
+    }
+}
