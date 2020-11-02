@@ -1,3 +1,4 @@
+use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 
@@ -38,5 +39,26 @@ impl<T: Hittable> Hittable for HittableList<T> {
         }
 
         closest
+    }
+
+    fn bounding_box(&self) -> Option<Aabb> {
+        if self.objects.is_empty() {
+            return None;
+        }
+
+        let mut result: Option<Aabb> = None;
+
+        for obj in self.objects.iter() {
+            if let Some(b) = obj.bounding_box() {
+                result = match result {
+                    None => Some(b),
+                    Some(r) => Some(Aabb::surrounding_box(&r, &b)),
+                };
+            } else {
+                return None;
+            }
+        }
+
+        result
     }
 }

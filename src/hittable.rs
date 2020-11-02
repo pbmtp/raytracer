@@ -1,3 +1,4 @@
+use crate::aabb::Aabb;
 use crate::materials::Material;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
@@ -50,4 +51,5 @@ impl<'a> HitRecord<'a> {
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
+    fn bounding_box(&self) -> Option<Aabb>;
 }
