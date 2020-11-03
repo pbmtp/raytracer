@@ -17,8 +17,8 @@ mod aabb;
 mod camera;
 mod config;
 mod hittable;
-mod hittable_list;
 mod materials;
+mod moving_sphere;
 mod ray;
 mod sphere;
 mod tools;
@@ -27,8 +27,8 @@ mod vec3;
 use camera::Camera;
 use config::Config;
 use hittable::Hittable;
-use hittable_list::HittableList;
 use materials::{Dielectric, Lambertian, Metal};
+use moving_sphere::MovingSphere;
 use ray::Ray;
 use sphere::Sphere;
 use tools::{random_double, random_double_range};
@@ -55,59 +55,55 @@ fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
 
-fn simple_scene() -> HittableList<Sphere> {
+fn simple_scene() -> Vec<Box<dyn Hittable + Sync>> {
     // World
-    let mut world = HittableList {
-        objects: Vec::new(),
-    };
+    let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
 
     // ground
     let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
         material: Box::new(material_ground),
-    });
+    }));
 
     // fixed part
     let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
     let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
     let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
 
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(0.0, 0.0, 0.0),
         radius: 0.5,
         material: Box::new(material_center),
-    });
+    }));
 
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(0.0, 0.0, -1.0),
         radius: 0.5,
         material: Box::new(material_left),
-    });
+    }));
 
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(0.0, 0.0, 1.0),
         radius: 0.5,
         material: Box::new(material_right),
-    });
+    }));
 
     world
 }
 
-fn random_scene() -> HittableList<Sphere> {
+fn random_scene(cfg: &Config) -> Vec<Box<dyn Hittable + Sync>> {
     // World
-    let mut world = HittableList {
-        objects: Vec::new(),
-    };
+    let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
 
     // ground
     let material_ground = Lambertian::new(Color::new(0.5, 0.5, 0.5));
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
         material: Box::new(material_ground),
-    });
+    }));
 
     // random part
     for a in -11..11 {
@@ -126,29 +122,43 @@ fn random_scene() -> HittableList<Sphere> {
                     // diffuse
                     let albedo = Color::random() * Color::random();
                     let sphere_material = Lambertian::new(albedo);
-                    world.add(Sphere {
-                        center,
-                        radius: 0.2,
-                        material: Box::new(sphere_material),
-                    });
+                    if cfg.time0 == cfg.time1 {
+                        // simple sphere
+                        world.push(Box::new(Sphere {
+                            center,
+                            radius: 0.2,
+                            material: Box::new(sphere_material),
+                        }));
+                    } else {
+                        // moving sphere
+                        let center2 = center + Vec3::new(0.0, random_double_range(0.0, 0.5), 0.0);
+                        world.push(Box::new(MovingSphere {
+                            center0: center,
+                            center1: center2,
+                            time0: 0.0,
+                            time1: 1.0,
+                            radius: 0.2,
+                            material: Box::new(sphere_material),
+                        }));
+                    }
                 } else if choose_mat < 0.95 {
                     // metal
                     let albedo = Color::random_range(0.5, 1.0);
                     let fuzz = random_double_range(0.0, 0.5);
                     let sphere_material = Metal::new(albedo, fuzz);
-                    world.add(Sphere {
+                    world.push(Box::new(Sphere {
                         center,
                         radius: 0.2,
                         material: Box::new(sphere_material),
-                    });
+                    }));
                 } else {
                     // glass
                     let sphere_material = Dielectric::new(1.5);
-                    world.add(Sphere {
+                    world.push(Box::new(Sphere {
                         center,
                         radius: 0.2,
                         material: Box::new(sphere_material),
-                    });
+                    }));
                 }
             }
         }
@@ -156,25 +166,25 @@ fn random_scene() -> HittableList<Sphere> {
 
     // fixed part
     let material1 = Dielectric::new(1.5);
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(0.0, 1.0, 0.0),
         radius: 1.0,
         material: Box::new(material1),
-    });
+    }));
 
     let material2 = Lambertian::new(Color::new(0.4, 0.2, 0.1));
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(-4.0, 1.0, 0.0),
         radius: 1.0,
         material: Box::new(material2),
-    });
+    }));
 
     let material3 = Metal::new(Color::new(0.7, 0.6, 0.5), 0.0);
-    world.add(Sphere {
+    world.push(Box::new(Sphere {
         center: Point3::new(4.0, 1.0, 0.0),
         radius: 1.0,
         material: Box::new(material3),
-    });
+    }));
 
     world
 }
@@ -182,7 +192,7 @@ fn random_scene() -> HittableList<Sphere> {
 fn render(cfg: &Config, name: &str) {
     // World
     let world = if cfg.quality {
-        random_scene()
+        random_scene(cfg)
     } else {
         simple_scene()
     };
@@ -202,6 +212,8 @@ fn render(cfg: &Config, name: &str) {
         cfg.ratio,
         aperture,
         dist_to_focus,
+        0.0,
+        1.0,
     );
 
     // Iterate over the coordinates and pixels of the image
@@ -257,7 +269,7 @@ fn render(cfg: &Config, name: &str) {
 
 fn main() {
     // let cfg = Config::speed();
-    let cfg = Config::quality();
+    let cfg = Config::quality(false);
 
     let start = Instant::now();
     render(&cfg, "out-test.png");
