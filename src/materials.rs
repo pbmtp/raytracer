@@ -1,5 +1,6 @@
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
+use crate::texture::{Texture, SolidTexture};
 use crate::tools::random_double;
 use crate::vec3::{Color, Vec3};
 
@@ -15,12 +16,14 @@ pub trait Material: Sync {
 
 // Lambertian
 pub struct Lambertian {
-    albedo: Color,
+    pub albedo: Box<dyn Texture>,
 }
 
-impl Lambertian {
-    pub fn new(albedo: Color) -> Lambertian {
-        Lambertian { albedo }
+impl From<Color> for Lambertian {
+    fn from(color: Color) -> Self {
+        Lambertian {
+            albedo: Box::new(SolidTexture::from(color))
+        }
     }
 }
 
@@ -30,7 +33,7 @@ impl Material for Lambertian {
         let scatter_direction = Vec3::random_in_hemisphere(&hr.get_normal());
 
         Scatter {
-            attenuation: self.albedo,
+            attenuation: self.albedo.value(0.0, 0.0, &hr.get_p()),
             scattered: Some(Ray::new(hr.get_p(), scatter_direction, ray.time())),
         }
     }

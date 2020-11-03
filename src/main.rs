@@ -21,6 +21,7 @@ mod materials;
 mod moving_sphere;
 mod ray;
 mod sphere;
+mod texture;
 mod tools;
 mod vec3;
 
@@ -60,7 +61,7 @@ fn simple_scene() -> Vec<Box<dyn Hittable + Sync>> {
     let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
 
     // ground
-    let material_ground = Lambertian::new(Color::new(0.8, 0.8, 0.0));
+    let material_ground = Lambertian::from(Color::new(0.8, 0.8, 0.0));
     world.push(Box::new(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
@@ -68,7 +69,7 @@ fn simple_scene() -> Vec<Box<dyn Hittable + Sync>> {
     }));
 
     // fixed part
-    let material_center = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    let material_center = Lambertian::from(Color::new(0.7, 0.3, 0.3));
     let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
     let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
 
@@ -98,7 +99,7 @@ fn random_scene(cfg: &Config) -> Vec<Box<dyn Hittable + Sync>> {
     let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
 
     // ground
-    let material_ground = Lambertian::new(Color::new(0.5, 0.5, 0.5));
+    let material_ground = Lambertian::from(Color::new(0.5, 0.5, 0.5));
     world.push(Box::new(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
@@ -121,7 +122,7 @@ fn random_scene(cfg: &Config) -> Vec<Box<dyn Hittable + Sync>> {
                 if choose_mat < 0.8 {
                     // diffuse
                     let albedo = Color::random() * Color::random();
-                    let sphere_material = Lambertian::new(albedo);
+                    let sphere_material = Lambertian::from(albedo);
                     if cfg.time0 == cfg.time1 {
                         // simple sphere
                         world.push(Box::new(Sphere {
@@ -172,7 +173,7 @@ fn random_scene(cfg: &Config) -> Vec<Box<dyn Hittable + Sync>> {
         material: Box::new(material1),
     }));
 
-    let material2 = Lambertian::new(Color::new(0.4, 0.2, 0.1));
+    let material2 = Lambertian::from(Color::new(0.4, 0.2, 0.1));
     world.push(Box::new(Sphere {
         center: Point3::new(-4.0, 1.0, 0.0),
         radius: 1.0,
