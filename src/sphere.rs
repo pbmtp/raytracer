@@ -47,7 +47,7 @@ impl Hittable for Sphere {
         None
     }
 
-    fn bounding_box(&self) -> Option<Aabb> {
+    fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<Aabb> {
         let r = self.radius;
 
         Some(Aabb::new(

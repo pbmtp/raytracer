@@ -51,7 +51,7 @@ impl<'a> HitRecord<'a> {
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
-    fn bounding_box(&self) -> Option<Aabb>;
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb>;
 }
 
 impl Hittable for Vec<Box<dyn Hittable + Sync>> {
@@ -69,7 +69,7 @@ impl Hittable for Vec<Box<dyn Hittable + Sync>> {
         closest
     }
 
-    fn bounding_box(&self) -> Option<Aabb> {
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {
         if self.is_empty() {
             return None;
         }
@@ -77,7 +77,7 @@ impl Hittable for Vec<Box<dyn Hittable + Sync>> {
         let mut result: Option<Aabb> = None;
 
         for obj in self.iter() {
-            if let Some(b) = obj.bounding_box() {
+            if let Some(b) = obj.bounding_box(time0, time1) {
                 result = match result {
                     None => Some(b),
                     Some(r) => Some(Aabb::surrounding_box(&r, &b)),

@@ -57,13 +57,18 @@ impl Hittable for MovingSphere {
         None
     }
 
-    // FIXME handle time
-    fn bounding_box(&self) -> Option<Aabb> {
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {
         let r = self.radius;
 
-        Some(Aabb::new(
-            self.center(0.0) - Vec3::new(r, r, r),
-            self.center(0.0) + Vec3::new(r, r, r),
-        ))
+        let box0 = Aabb::new(
+            self.center(time0) - Vec3::new(r, r, r),
+            self.center(time0) + Vec3::new(r, r, r),
+        );
+        let box1 = Aabb::new(
+            self.center(time1) - Vec3::new(r, r, r),
+            self.center(time1) + Vec3::new(r, r, r),
+        );
+
+        Some(Aabb::surrounding_box(&box0, &box1))
     }
 }
