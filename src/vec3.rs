@@ -172,6 +172,12 @@ impl Vec3 {
         r_out_perp + r_out_parallel
     }
 
+    pub fn near_zero(self) -> bool {
+        // Return true if the vector is close to zero in all dimensions.
+        let s = 1E-8f64;
+        self.e[0].abs() < s && self.e[1].abs() < s && self.e[2].abs() < s
+    }
+
     // TODO normalize
 }
 

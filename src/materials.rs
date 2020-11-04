@@ -29,8 +29,11 @@ impl From<Color> for Lambertian {
 
 impl Material for Lambertian {
     fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
-        // let scatter_direction = hr.get_normal() + Vec3::random_unit_vector();
-        let scatter_direction = Vec3::random_in_hemisphere(&hr.get_normal());
+        let mut scatter_direction = hr.get_normal() + Vec3::random_unit_vector();
+
+        if scatter_direction.near_zero() {
+            scatter_direction = hr.get_normal();
+        }
 
         Scatter {
             attenuation: self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p()),
