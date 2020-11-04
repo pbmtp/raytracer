@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::Material;
@@ -8,6 +10,25 @@ pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
     pub material: Box<dyn Material>,
+}
+
+impl Sphere {
+    pub fn get_uv(p: &Point3) -> (f64, f64) {
+        // p: a given point on the sphere of radius one, centered at the origin.
+        // u: returned value [0,1] of angle around the Y axis from X=-1.
+        // v: returned value [0,1] of angle from Y=-1 to Y=+1.
+        //     <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+        //     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+        //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+
+        let theta = (-p.y()).acos();
+        let phi = (-p.z()).atan2(p.x()) + PI;
+
+        let u = phi / (2.0 * PI);
+        let v = theta / PI;
+
+        (u, v)
+    }
 }
 
 impl Hittable for Sphere {
@@ -25,8 +46,9 @@ impl Hittable for Sphere {
             if temp > tmin && temp < tmax {
                 let p = r.point_at(temp);
                 let outward_normal = (p - self.center) / self.radius;
+                let (u,v) = Sphere::get_uv(&outward_normal);
 
-                let mut hr = HitRecord::new(p, Vec3::zero(), temp, &*self.material);
+                let mut hr = HitRecord::new(p, Vec3::zero(), temp, u, v, &*self.material);
                 hr.set_front_face(&r, outward_normal);
 
                 return Some(hr);
@@ -36,8 +58,9 @@ impl Hittable for Sphere {
             if temp > tmin && temp < tmax {
                 let p = r.point_at(temp);
                 let outward_normal = (p - self.center) / self.radius;
+                let (u,v) = Sphere::get_uv(&outward_normal);
 
-                let mut hr = HitRecord::new(p, Vec3::zero(), temp, &*self.material);
+                let mut hr = HitRecord::new(p, Vec3::zero(), temp, u, v, &*self.material);
                 hr.set_front_face(&r, outward_normal);
 
                 return Some(hr);

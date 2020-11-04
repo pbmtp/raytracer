@@ -32,6 +32,7 @@ use materials::{Dielectric, Lambertian, Metal};
 use moving_sphere::MovingSphere;
 use ray::Ray;
 use sphere::Sphere;
+use texture::CheckerTexture;
 use tools::{random_double, random_double_range};
 use vec3::{Color, Point3, Vec3};
 
@@ -98,11 +99,24 @@ fn random_scene(cfg: &Config) -> Vec<Box<dyn Hittable + Sync>> {
     // World
     let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
 
-    // ground
+    // ground (uniform)
+    /*
     let material_ground = Lambertian::from(Color::new(0.5, 0.5, 0.5));
     world.push(Box::new(Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
+        material: Box::new(material_ground),
+    }));
+    */
+
+    // ground (checker)
+    let checker = CheckerTexture::from((Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
+    let material_ground = Lambertian {
+        albedo: Box::new(checker),
+    };
+    world.push(Box::new(Sphere {
+        center: Point3::new(0.0, -1000.0, 0.0),
+        radius: 1000.0,
         material: Box::new(material_ground),
     }));
 

@@ -1,6 +1,6 @@
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::texture::{Texture, SolidTexture};
+use crate::texture::{SolidTexture, Texture};
 use crate::tools::random_double;
 use crate::vec3::{Color, Vec3};
 
@@ -22,7 +22,7 @@ pub struct Lambertian {
 impl From<Color> for Lambertian {
     fn from(color: Color) -> Self {
         Lambertian {
-            albedo: Box::new(SolidTexture::from(color))
+            albedo: Box::new(SolidTexture::from(color)),
         }
     }
 }
@@ -33,7 +33,7 @@ impl Material for Lambertian {
         let scatter_direction = Vec3::random_in_hemisphere(&hr.get_normal());
 
         Scatter {
-            attenuation: self.albedo.value(0.0, 0.0, &hr.get_p()),
+            attenuation: self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p()),
             scattered: Some(Ray::new(hr.get_p(), scatter_direction, ray.time())),
         }
     }

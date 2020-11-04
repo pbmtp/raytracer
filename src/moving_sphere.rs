@@ -2,6 +2,7 @@ use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::Material;
 use crate::ray::Ray;
+use crate::sphere::Sphere;
 use crate::vec3::{Point3, Vec3};
 
 pub struct MovingSphere {
@@ -35,8 +36,9 @@ impl Hittable for MovingSphere {
             if temp > tmin && temp < tmax {
                 let p = r.point_at(temp);
                 let outward_normal = (p - self.center(r.time())) / self.radius;
+                let (u, v) = Sphere::get_uv(&outward_normal);
 
-                let mut hr = HitRecord::new(p, Vec3::zero(), temp, &*self.material);
+                let mut hr = HitRecord::new(p, Vec3::zero(), temp, u, v, &*self.material);
                 hr.set_front_face(&r, outward_normal);
 
                 return Some(hr);
@@ -46,8 +48,9 @@ impl Hittable for MovingSphere {
             if temp > tmin && temp < tmax {
                 let p = r.point_at(temp);
                 let outward_normal = (p - self.center(r.time())) / self.radius;
+                let (u, v) = Sphere::get_uv(&outward_normal);
 
-                let mut hr = HitRecord::new(p, Vec3::zero(), temp, &*self.material);
+                let mut hr = HitRecord::new(p, Vec3::zero(), temp, u, v, &*self.material);
                 hr.set_front_face(&r, outward_normal);
 
                 return Some(hr);
