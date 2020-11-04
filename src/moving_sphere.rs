@@ -29,35 +29,29 @@ impl Hittable for MovingSphere {
         let c = oc.length_squared() - self.radius.powi(2);
         let discriminant = half_b.powi(2) - a * c;
 
-        if discriminant > 0.0 {
-            let root = discriminant.sqrt();
+        if discriminant < 0.0 {
+            return None;
+        }
 
-            let temp = (-half_b - root) / a;
-            if temp > tmin && temp < tmax {
-                let p = r.point_at(temp);
-                let outward_normal = (p - self.center(r.time())) / self.radius;
-                let (u, v) = Sphere::get_uv(&outward_normal);
+        let sqrtd = discriminant.sqrt();
 
-                let mut hr = HitRecord::new(p, Vec3::zero(), temp, u, v, &*self.material);
-                hr.set_front_face(&r, outward_normal);
-
-                return Some(hr);
-            }
-
-            let temp = (-half_b + root) / a;
-            if temp > tmin && temp < tmax {
-                let p = r.point_at(temp);
-                let outward_normal = (p - self.center(r.time())) / self.radius;
-                let (u, v) = Sphere::get_uv(&outward_normal);
-
-                let mut hr = HitRecord::new(p, Vec3::zero(), temp, u, v, &*self.material);
-                hr.set_front_face(&r, outward_normal);
-
-                return Some(hr);
+        // Find the nearest root that lies in the acceptable range.
+        let mut root = (-half_b - sqrtd) / a;
+        if root < tmin || tmax < root {
+            root = (-half_b + sqrtd) / a;
+            if root < tmin || tmax < root {
+                return None;
             }
         }
 
-        None
+        let p = r.point_at(root);
+        let outward_normal = (p - self.center(r.time())) / self.radius;
+        let (u, v) = Sphere::get_uv(&outward_normal);
+
+        let mut hr = HitRecord::new(p, Vec3::zero(), root, u, v, &*self.material);
+        hr.set_front_face(&r, outward_normal);
+
+        return Some(hr);
     }
 
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {
