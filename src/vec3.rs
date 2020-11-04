@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use std::f64::consts::PI;
 use std::iter::Sum;
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
@@ -57,11 +56,7 @@ impl Vec3 {
     }
 
     pub fn random_unit_vector() -> Vec3 {
-        let a = random_double_range(0.0, 2.0 * PI);
-        let z = random_double_range(-1.0, 1.0);
-        let r = (1f64 - z * z).sqrt();
-
-        Vec3::new(r * a.cos(), r * a.sin(), z)
+        Vec3::random_in_unit_sphere().to_unit_vector()
     }
 
     pub fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
