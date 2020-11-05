@@ -68,13 +68,12 @@ fn render(scene: &Scene, name: &str) {
     // FIXME https://docs.rs/indicatif/0.15.0/indicatif/#iterators
     let bar = ProgressBar::new(width as u64 * height as u64);
     pixels
-        .par_chunks_mut(3)
+        .par_chunks_mut(BYTES_PER_PIXEL)
         .into_par_iter()
-        .rev()
         .enumerate()
         .for_each(|(idx, pixel)| {
-            let y = idx / width;
-            let x = width - (idx % width);
+            let y = height - (idx / width);
+            let x = idx % width;
 
             let mut c = Color::zero();
             for _s in 0..samples_per_pixel {
