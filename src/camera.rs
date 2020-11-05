@@ -61,10 +61,16 @@ impl Camera {
         let rd = self.lens_radius * Vec3::random_in_unit_sphere();
         let offset = self.u * rd.x() + self.v * rd.y();
 
+        let time = if self.time0 == self.time1 {
+            0.0
+        } else {
+            random_double_range(self.time0, self.time1)
+        };
+
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,
-            random_double_range(self.time0, self.time1),
+            time,
         )
     }
 }

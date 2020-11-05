@@ -15,26 +15,23 @@ use std::time::Instant;
 
 mod aabb;
 mod camera;
-mod config;
 mod hittable;
 mod materials;
 mod moving_sphere;
 mod ray;
+mod scene;
 mod sphere;
 mod texture;
 mod tools;
 mod vec3;
 
-use camera::Camera;
-use config::Config;
 use hittable::Hittable;
-use materials::{Dielectric, Lambertian, Metal};
-use moving_sphere::MovingSphere;
 use ray::Ray;
-use sphere::Sphere;
-use texture::CheckerTexture;
-use tools::{random_double, random_double_range};
-use vec3::{Color, Point3, Vec3};
+use scene::{Scene, SceneKind};
+use tools::random_double;
+use vec3::Color;
+
+const BYTES_PER_PIXEL: usize = 3;
 
 fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
@@ -57,187 +54,14 @@ fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
 
-fn simple_scene() -> Vec<Box<dyn Hittable + Sync>> {
-    // World
-    let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
-
-    // ground
-    let material_ground = Lambertian::from(Color::new(0.8, 0.8, 0.0));
-    world.push(Box::new(Sphere {
-        center: Point3::new(0.0, -100.5, -1.0),
-        radius: 100.0,
-        material: Box::new(material_ground),
-    }));
-
-    // fixed part
-    let material_center = Lambertian::from(Color::new(0.7, 0.3, 0.3));
-    let material_left = Metal::new(Color::new(0.8, 0.8, 0.8), 0.3);
-    let material_right = Metal::new(Color::new(0.8, 0.6, 0.2), 1.0);
-
-    world.push(Box::new(Sphere {
-        center: Point3::new(0.0, 0.0, 0.0),
-        radius: 0.5,
-        material: Box::new(material_center),
-    }));
-
-    world.push(Box::new(Sphere {
-        center: Point3::new(0.0, 0.0, -1.0),
-        radius: 0.5,
-        material: Box::new(material_left),
-    }));
-
-    world.push(Box::new(Sphere {
-        center: Point3::new(0.0, 0.0, 1.0),
-        radius: 0.5,
-        material: Box::new(material_right),
-    }));
-
-    world
-}
-
-fn random_scene(cfg: &Config) -> Vec<Box<dyn Hittable + Sync>> {
-    // World
-    let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
-
-    // ground (uniform)
-    /*
-    let material_ground = Lambertian::from(Color::new(0.5, 0.5, 0.5));
-    world.push(Box::new(Sphere {
-        center: Point3::new(0.0, -100.5, -1.0),
-        radius: 100.0,
-        material: Box::new(material_ground),
-    }));
-    */
-
-    // ground (checker)
-    let checker = CheckerTexture::from((Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
-    let material_ground = Lambertian {
-        albedo: Box::new(checker),
-    };
-    world.push(Box::new(Sphere {
-        center: Point3::new(0.0, -1000.0, 0.0),
-        radius: 1000.0,
-        material: Box::new(material_ground),
-    }));
-
-    // random part
-    for a in -11..11 {
-        for b in -11..11 {
-            let choose_mat = random_double();
-            let center = Point3::new(
-                a as f64 + 0.9 * random_double(),
-                0.2,
-                b as f64 + 0.9 * random_double(),
-            );
-
-            if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                // shared_ptr<material> sphere_material;
-
-                if choose_mat < 0.8 {
-                    // diffuse
-                    let albedo = Color::random() * Color::random();
-                    let sphere_material = Lambertian::from(albedo);
-                    if cfg.time0 == cfg.time1 {
-                        // simple sphere
-                        world.push(Box::new(Sphere {
-                            center,
-                            radius: 0.2,
-                            material: Box::new(sphere_material),
-                        }));
-                    } else {
-                        // moving sphere
-                        let center2 = center + Vec3::new(0.0, random_double_range(0.0, 0.5), 0.0);
-                        world.push(Box::new(MovingSphere {
-                            center0: center,
-                            center1: center2,
-                            time0: 0.0,
-                            time1: 1.0,
-                            radius: 0.2,
-                            material: Box::new(sphere_material),
-                        }));
-                    }
-                } else if choose_mat < 0.95 {
-                    // metal
-                    let albedo = Color::random_range(0.5, 1.0);
-                    let fuzz = random_double_range(0.0, 0.5);
-                    let sphere_material = Metal::new(albedo, fuzz);
-                    world.push(Box::new(Sphere {
-                        center,
-                        radius: 0.2,
-                        material: Box::new(sphere_material),
-                    }));
-                } else {
-                    // glass
-                    let sphere_material = Dielectric::new(1.5);
-                    world.push(Box::new(Sphere {
-                        center,
-                        radius: 0.2,
-                        material: Box::new(sphere_material),
-                    }));
-                }
-            }
-        }
-    }
-
-    // fixed part
-    let material1 = Dielectric::new(1.5);
-    world.push(Box::new(Sphere {
-        center: Point3::new(0.0, 1.0, 0.0),
-        radius: 1.0,
-        material: Box::new(material1),
-    }));
-
-    let material2 = Lambertian::from(Color::new(0.4, 0.2, 0.1));
-    world.push(Box::new(Sphere {
-        center: Point3::new(-4.0, 1.0, 0.0),
-        radius: 1.0,
-        material: Box::new(material2),
-    }));
-
-    let material3 = Metal::new(Color::new(0.7, 0.6, 0.5), 0.0);
-    world.push(Box::new(Sphere {
-        center: Point3::new(4.0, 1.0, 0.0),
-        radius: 1.0,
-        material: Box::new(material3),
-    }));
-
-    world
-}
-
-fn render(cfg: &Config, name: &str) {
-    // World
-    let world = if cfg.quality {
-        random_scene(cfg)
-    } else {
-        simple_scene()
-    };
-
-    // Camera
-    let lookfrom = Point3::new(13.0, 2.0, 3.0);
-    let lookat = Point3::new(0.0, 0.0, 0.0);
-    let vup = Vec3::new(0.0, 1.0, 0.0);
-    let dist_to_focus = 10.0;
-    let aperture = 0.1;
-
-    let cam = Camera::new(
-        lookfrom,
-        lookat,
-        vup,
-        20.0,
-        cfg.ratio,
-        aperture,
-        dist_to_focus,
-        0.0,
-        1.0,
-    );
-
+fn render(scene: &Scene, name: &str) {
     // Iterate over the coordinates and pixels of the image
-    let width = cfg.width;
-    let height = cfg.height;
-    let samples_per_pixel = cfg.samples_per_pixel;
-    let max_depth = cfg.max_depth;
+    let width = scene.cfg.width;
+    let height = scene.cfg.height;
+    let samples_per_pixel = scene.cfg.samples_per_pixel;
+    let max_depth = scene.cfg.max_depth;
 
-    let len = width * height * cfg.bytes_per_pixel;
+    let len = width * height * BYTES_PER_PIXEL;
     // https://github.com/rust-lang/rust/issues/54628
     let mut pixels = vec![0u8; len];
 
@@ -257,9 +81,9 @@ fn render(cfg: &Config, name: &str) {
                 let u = (x as f64 + random_double()) / (width as f64 - 1f64);
                 let v = (y as f64 + random_double()) / (height as f64 - 1f64);
 
-                let r = cam.get_ray(u, v);
+                let r = scene.camera.get_ray(u, v);
 
-                c += ray_color(&r, &world, max_depth);
+                c += ray_color(&r, &scene.world, max_depth);
             }
 
             let avg = c.to_u8_avg_gamma2(samples_per_pixel);
@@ -283,11 +107,11 @@ fn render(cfg: &Config, name: &str) {
 }
 
 fn main() {
-    // let cfg = Config::speed();
-    let cfg = Config::quality(false);
+    // let scene = Scene::new(true, false);
+    let scene = Scene::new(false, false, SceneKind::TwoCheckerSphere);
 
     let start = Instant::now();
-    render(&cfg, "out-test.png");
+    render(&scene, "out-test.png");
     println!(
         "Time elapsed rendering  scene is: {}",
         HumanDuration(start.elapsed())
