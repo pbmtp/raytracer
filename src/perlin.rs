@@ -20,7 +20,7 @@ impl Perlin {
         }
     }
 
-    pub fn noise(&self, p: &Point3) -> f64 {
+    fn noise(&self, p: &Point3) -> f64 {
         let u = p.x() - p.x().floor();
         let v = p.y() - p.y().floor();
         let w = p.z() - p.z().floor();
@@ -46,6 +46,20 @@ impl Perlin {
         }
 
         Perlin::interpolation(&c, u, v, w)
+    }
+
+    pub fn turb(&self, p: &Point3, depth: usize) -> f64 {
+        let mut accum = 0.0;
+        let mut temp_p = *p;
+        let mut weight = 1.0;
+
+        for _ in 0..depth  {
+            accum += weight * self.noise(&temp_p);
+            weight *= 0.5;
+            temp_p *= 2.0;
+        }
+
+        return accum.abs();
     }
 
     fn interpolation(c: &[[[Point3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
