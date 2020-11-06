@@ -1,10 +1,10 @@
-use crate::tools::{random_double, random_usize_range};
-use crate::vec3::Point3;
+use crate::tools::random_usize_range;
+use crate::vec3::{Point3, Vec3};
 
 const PERLIN_SIZE: usize = 256;
 
 pub struct Perlin {
-    rand_vec: Vec<f64>,
+    rand_vec: Vec<Point3>,
     perm_x: Vec<usize>,
     perm_y: Vec<usize>,
     perm_z: Vec<usize>,
@@ -25,15 +25,11 @@ impl Perlin {
         let v = p.y() - p.y().floor();
         let w = p.z() - p.z().floor();
 
-        let uu = u * u * (3.0 - 2.0 * u);
-        let vv = v * v * (3.0 - 2.0 * v);
-        let ww = w * w * (3.0 - 2.0 * w);
-
         let i = p.x().floor() as isize;
         let j = p.y().floor() as isize;
         let k = p.z().floor() as isize;
 
-        let mut c = [[[0.0; 2]; 2]; 2];
+        let mut c = [[[Point3::zero(); 2]; 2]; 2];
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
@@ -49,18 +45,23 @@ impl Perlin {
             }
         }
 
-        Perlin::trilinear_interpolation(&c, uu, vv, ww)
+        Perlin::interpolation(&c, u, v, w)
     }
 
-    fn trilinear_interpolation(c: &[[[f64; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
+    fn interpolation(c: &[[[Point3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
+        let uu = u * u * (3.0 - 2.0 * u);
+        let vv = v * v * (3.0 - 2.0 * v);
+        let ww = w * w * (3.0 - 2.0 * w);
+
         let mut accum = 0.0;
         for i in 0..2 {
             for j in 0..2 {
                 for k in 0..2 {
-                    accum += (i as f64 * u + (1 - i) as f64 * (1.0 - u))
-                        * (j as f64 * v + (1 - j) as f64 * (1.0 - v))
-                        * (k as f64 * w + (1 - k) as f64 * (1.0 - w))
-                        * c[i][j][k];
+                    let weight_v = Vec3::new(u - i as f64, v - j as f64, w - k as f64);
+                    accum += (i as f64 * uu + (1 - i) as f64 * (1.0 - uu))
+                        * (j as f64 * vv + (1 - j) as f64 * (1.0 - vv))
+                        * (k as f64 * ww + (1 - k) as f64 * (1.0 - ww))
+                        * c[i][j][k].dot(weight_v);
                 }
             }
         }
@@ -68,11 +69,11 @@ impl Perlin {
         accum
     }
 
-    fn generate_rand_vec() -> Vec<f64> {
+    fn generate_rand_vec() -> Vec<Point3> {
         let mut p = Vec::with_capacity(PERLIN_SIZE);
 
         for _ in 0..PERLIN_SIZE {
-            p.push(random_double());
+            p.push(Point3::random_range(-1.0, 1.0).to_unit_vector());
         }
 
         p
