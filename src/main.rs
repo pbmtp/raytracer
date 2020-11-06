@@ -18,6 +18,7 @@ mod camera;
 mod hittable;
 mod materials;
 mod moving_sphere;
+mod perlin;
 mod ray;
 mod scene;
 mod sphere;
@@ -41,8 +42,8 @@ fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
 
     if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
         let scatter = hr.material.scatter(&r, &hr);
-        if let Some(r) = scatter.scattered {
-            return scatter.attenuation * ray_color(&r, world, depth - 1);
+        if let Some(bounce) = scatter.scattered {
+            return scatter.attenuation * ray_color(&bounce, world, depth - 1);
         }
 
         return Color::zero();
@@ -107,7 +108,7 @@ fn render(scene: &Scene, name: &str) {
 
 fn main() {
     // let scene = Scene::new(true, false);
-    let scene = Scene::new(false, false, SceneKind::TwoCheckerSphere);
+    let scene = Scene::new(false, false, SceneKind::TwoPerlinSpheres);
 
     let start = Instant::now();
     render(&scene, "out-test.png");

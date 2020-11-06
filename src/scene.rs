@@ -3,7 +3,7 @@ use crate::hittable::Hittable;
 use crate::materials::{Dielectric, Lambertian, Metal};
 use crate::moving_sphere::MovingSphere;
 use crate::sphere::Sphere;
-use crate::texture::CheckerTexture;
+use crate::texture::{CheckerTexture, NoiseTexture};
 use crate::tools::{random_double, random_double_range};
 use crate::vec3::{Color, Point3, Vec3};
 
@@ -21,7 +21,8 @@ pub struct Config {
 pub enum SceneKind {
     RandomUniform,
     RandomChecker,
-    TwoCheckerSphere,
+    TwoCheckerSpheres,
+    TwoPerlinSpheres,
 }
 
 pub struct Scene {
@@ -81,10 +82,9 @@ impl Scene {
         let vup = Vec3::new(0.0, 1.0, 0.0);
         let vfov = 20.0;
         let dist_to_focus = 10.0;
-        let aperture = if kind == SceneKind::TwoCheckerSphere {
-            0.0
-        } else {
-            0.1
+        let aperture = match kind {
+            SceneKind::RandomUniform | SceneKind::RandomChecker => 0.1,
+            _ => 0.0,
         };
         // FIXME vfov def: 40.0 (20.0 for TwoCheckerSphere and Random*)
 
@@ -110,13 +110,38 @@ impl Scene {
             SceneKind::RandomUniform | SceneKind::RandomChecker => {
                 scene.create_random(kind);
             }
-            SceneKind::TwoCheckerSphere => scene.create_two_sphere(),
+            SceneKind::TwoCheckerSpheres => scene.create_two_spheres(),
+            SceneKind::TwoPerlinSpheres => scene.create_two_perlin_spheres(),
         }
 
         scene
     }
 
-    fn create_two_sphere(&mut self) {
+    fn create_two_perlin_spheres(&mut self) {
+        // ground
+        let noise = NoiseTexture::new();
+        let material_noise = Lambertian {
+            albedo: Box::new(noise),
+        };
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(0.0, -1000.0, 0.0),
+            radius: 1000.0,
+            material: Box::new(material_noise),
+        }));
+
+        // sphere
+        let noise = NoiseTexture::new();
+        let material_noise = Lambertian {
+            albedo: Box::new(noise),
+        };
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(0.0, 2.0, 0.0),
+            radius: 2.0,
+            material: Box::new(material_noise),
+        }));
+    }
+
+    fn create_two_spheres(&mut self) {
         let checker = CheckerTexture::from((Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
         let material_ground = Lambertian {
             albedo: Box::new(checker),
