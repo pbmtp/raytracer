@@ -119,7 +119,7 @@ impl Scene {
 
     fn create_two_perlin_spheres(&mut self) {
         // ground
-        let noise = NoiseTexture::new();
+        let noise = NoiseTexture::from(4.0);
         let material_noise = Lambertian {
             albedo: Box::new(noise),
         };
@@ -130,7 +130,7 @@ impl Scene {
         }));
 
         // sphere
-        let noise = NoiseTexture::new();
+        let noise = NoiseTexture::from(4.0);
         let material_noise = Lambertian {
             albedo: Box::new(noise),
         };
