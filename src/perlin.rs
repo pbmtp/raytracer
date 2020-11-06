@@ -25,6 +25,10 @@ impl Perlin {
         let v = p.y() - p.y().floor();
         let w = p.z() - p.z().floor();
 
+        let uu = u * u * (3.0 - 2.0 * u);
+        let vv = v * v * (3.0 - 2.0 * v);
+        let ww = w * w * (3.0 - 2.0 * w);
+
         let i = p.x().floor() as isize;
         let j = p.y().floor() as isize;
         let k = p.z().floor() as isize;
@@ -37,13 +41,15 @@ impl Perlin {
                     let jdx = (j + dj) & 255;
                     let kdx = (k + dk) & 255;
 
-                    c[di as usize][dj as usize][dk as usize] =
-                        self.rand_vec[self.perm_x[idx  as usize] ^ self.perm_y[jdx  as usize] ^ self.perm_z[kdx  as usize]];
+                    c[di as usize][dj as usize][dk as usize] = self.rand_vec[self.perm_x
+                        [idx as usize]
+                        ^ self.perm_y[jdx as usize]
+                        ^ self.perm_z[kdx as usize]];
                 }
             }
         }
 
-        Perlin::trilinear_interpolation(&c, u, v, w)
+        Perlin::trilinear_interpolation(&c, uu, vv, ww)
     }
 
     fn trilinear_interpolation(c: &[[[f64; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
