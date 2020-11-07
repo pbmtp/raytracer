@@ -2,7 +2,7 @@ use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::texture::{SolidTexture, Texture};
 use crate::tools::random_double;
-use crate::vec3::{Color, Vec3};
+use crate::vec3::{Color, Point3, Vec3};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Scatter {
@@ -12,6 +12,10 @@ pub struct Scatter {
 
 pub trait Material: Sync {
     fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter;
+
+    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
+        Color::zero()
+    }
 }
 
 // Lambertian
@@ -119,5 +123,23 @@ impl Material for Dielectric {
             attenuation,
             scattered: Some(Ray::new(hr.get_p(), direction, ray.time())),
         }
+    }
+}
+
+// DiffuseLight
+pub struct DiffuseLight {
+    pub emit: Box<dyn Texture>,
+}
+
+impl Material for DiffuseLight {
+    fn scatter(&self, _ray: &Ray, _hr: &HitRecord) -> Scatter {
+        Scatter {
+            attenuation: Color::zero(),
+            scattered: None,
+        }
+    }
+
+    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
+        self.emit.value(u, v, &p)
     }
 }

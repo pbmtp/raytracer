@@ -34,25 +34,24 @@ use vec3::Color;
 
 const BYTES_PER_PIXEL: usize = 3;
 
-fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: u32) -> Color {
+fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, depth: u32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if depth == 0 {
         return Color::zero();
     }
 
     if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
+        let emitted = hr.material.emitted(hr.get_u(), hr.get_v(), &hr.get_p());
+
         let scatter = hr.material.scatter(&r, &hr);
         if let Some(bounce) = scatter.scattered {
-            return scatter.attenuation * ray_color(&bounce, world, depth - 1);
+            return emitted + scatter.attenuation * ray_color(&bounce, background, world, depth - 1);
         }
 
-        return Color::zero();
+        return emitted;
     }
-
-    let unit_direction = r.direction().to_unit_vector();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-
-    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    
+    *background
 }
 
 fn render(scene: &Scene, name: &str) {
@@ -83,7 +82,7 @@ fn render(scene: &Scene, name: &str) {
 
                 let r = scene.camera.get_ray(u, v);
 
-                c += ray_color(&r, &scene.world, max_depth);
+                c += ray_color(&r, &scene.background, &scene.world, max_depth);
             }
 
             let avg = c.to_u8_avg_gamma2(samples_per_pixel);

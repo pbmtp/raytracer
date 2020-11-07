@@ -30,6 +30,7 @@ pub struct Scene {
     pub cfg: Config,
     pub world: Vec<Box<dyn Hittable + Sync>>,
     pub camera: Camera,
+    pub background: Color,
 }
 
 impl Config {
@@ -105,6 +106,7 @@ impl Scene {
             cfg,
             world: Vec::new(),
             camera,
+            background: Color::new(0.7, 0.8, 1.0),
         };
 
         match kind {
