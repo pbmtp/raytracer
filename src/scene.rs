@@ -3,7 +3,7 @@ use crate::hittable::Hittable;
 use crate::materials::{Dielectric, Lambertian, Metal};
 use crate::moving_sphere::MovingSphere;
 use crate::sphere::Sphere;
-use crate::texture::{CheckerTexture, NoiseTexture};
+use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use crate::tools::{random_double, random_double_range};
 use crate::vec3::{Color, Point3, Vec3};
 
@@ -23,6 +23,7 @@ pub enum SceneKind {
     RandomChecker,
     TwoCheckerSpheres,
     TwoPerlinSpheres,
+    ImageSphere,
 }
 
 pub struct Scene {
@@ -72,7 +73,7 @@ impl Config {
 }
 
 impl Scene {
-    pub fn new(speed: bool, moving: bool, kind: SceneKind) -> Scene {
+    pub fn new(speed: bool, moving: bool, kind: SceneKind, filename: &str) -> Scene {
         // Image config
         let cfg = Config::new(speed, moving);
 
@@ -112,9 +113,23 @@ impl Scene {
             }
             SceneKind::TwoCheckerSpheres => scene.create_two_spheres(),
             SceneKind::TwoPerlinSpheres => scene.create_two_perlin_spheres(),
+            SceneKind::ImageSphere => scene.create_image_sphere(filename),
         }
 
         scene
+    }
+
+    fn create_image_sphere(&mut self, filename: &str) {
+        // sphere
+        let texture = ImageTexture::new(filename);
+        let material = Lambertian {
+            albedo: Box::new(texture),
+        };
+        self.world.push(Box::new(Sphere {
+            center: Point3::zero(),
+            radius: 2.0,
+            material: Box::new(material),
+        }));
     }
 
     fn create_two_perlin_spheres(&mut self) {

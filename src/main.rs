@@ -108,7 +108,7 @@ fn render(scene: &Scene, name: &str) {
 
 fn main() {
     // let scene = Scene::new(true, false);
-    let scene = Scene::new(false, false, SceneKind::TwoPerlinSpheres);
+    let scene = Scene::new(false, false, SceneKind::ImageSphere, "data/1k/earth.jpg");
 
     let start = Instant::now();
     render(&scene, "out-test.png");
