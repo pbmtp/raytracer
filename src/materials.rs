@@ -131,6 +131,14 @@ pub struct DiffuseLight {
     pub emit: Box<dyn Texture>,
 }
 
+impl From<Color> for DiffuseLight {
+    fn from(color: Color) -> Self {
+        DiffuseLight {
+            emit: Box::new(SolidTexture::from(color)),
+        }
+    }
+}
+
 impl Material for DiffuseLight {
     fn scatter(&self, _ray: &Ray, _hr: &HitRecord) -> Scatter {
         Scatter {

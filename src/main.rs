@@ -14,6 +14,7 @@ use rayon::prelude::*;
 use std::time::Instant;
 
 mod aabb;
+mod aarect;
 mod camera;
 mod hittable;
 mod materials;
@@ -108,7 +109,7 @@ fn render(scene: &Scene, name: &str) {
 
 fn main() {
     // let scene = Scene::new(true, false);
-    let scene = Scene::new(false, false, SceneKind::ImageSphere, "data/1k/earth.jpg");
+    let scene = Scene::new(false, false, SceneKind::SimpleLight, "data/1k/earth.jpg");
 
     let start = Instant::now();
     render(&scene, "out-test.png");

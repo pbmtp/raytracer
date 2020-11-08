@@ -1,6 +1,7 @@
+use crate::aarect::XyRect;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
-use crate::materials::{Dielectric, Lambertian, Metal};
+use crate::materials::{Dielectric, DiffuseLight, Lambertian, Metal};
 use crate::moving_sphere::MovingSphere;
 use crate::sphere::Sphere;
 use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture};
@@ -24,6 +25,7 @@ pub enum SceneKind {
     TwoCheckerSpheres,
     TwoPerlinSpheres,
     ImageSphere,
+    SimpleLight,
 }
 
 pub struct Scene {
@@ -79,8 +81,16 @@ impl Scene {
         let cfg = Config::new(speed, moving);
 
         // Camera
-        let lookfrom = Point3::new(13.0, 2.0, 3.0);
-        let lookat = Point3::new(0.0, 0.0, 0.0);
+        let lookfrom = match kind {
+            SceneKind::SimpleLight => Point3::new(26.0, 3.0, 6.0),
+            _ => Point3::new(13.0, 2.0, 3.0),
+        };
+
+        let lookat = match kind {
+            SceneKind::SimpleLight => Point3::new(0.0, 2.0, 0.0),
+            _ => Point3::zero(),
+        };
+
         let vup = Vec3::new(0.0, 1.0, 0.0);
         let vfov = 20.0;
         let dist_to_focus = 10.0;
@@ -102,11 +112,16 @@ impl Scene {
             cfg.time1,
         );
 
+        let background = match kind {
+            SceneKind::SimpleLight => Color::zero(),
+            _ => Color::new(0.7, 0.8, 1.0),
+        };
+
         let mut scene = Scene {
             cfg,
             world: Vec::new(),
             camera,
-            background: Color::new(0.7, 0.8, 1.0),
+            background,
         };
 
         match kind {
@@ -116,9 +131,46 @@ impl Scene {
             SceneKind::TwoCheckerSpheres => scene.create_two_spheres(),
             SceneKind::TwoPerlinSpheres => scene.create_two_perlin_spheres(),
             SceneKind::ImageSphere => scene.create_image_sphere(filename),
+            SceneKind::SimpleLight => scene.create_simple_light(),
         }
 
         scene
+    }
+
+    fn create_simple_light(&mut self) {
+        // ground
+        let noise = NoiseTexture::from(4.0);
+        let material_noise = Lambertian {
+            albedo: Box::new(noise),
+        };
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(0.0, -1000.0, 0.0),
+            radius: 1000.0,
+            material: Box::new(material_noise),
+        }));
+
+        // sphere
+        let noise = NoiseTexture::from(4.0);
+        let material_noise = Lambertian {
+            albedo: Box::new(noise),
+        };
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(0.0, 2.0, 0.0),
+            radius: 2.0,
+            material: Box::new(material_noise),
+        }));
+
+        // Rectangle light
+        let difflight = DiffuseLight::from(Color::new(4.0, 4.0, 4.0));
+
+        self.world.push(Box::new(XyRect {
+            x0: 3.0,
+            x1: 5.0,
+            y0: 1.0,
+            y1: 3.0,
+            k: -2.0,
+            material: Box::new(difflight),
+        }));
     }
 
     fn create_image_sphere(&mut self, filename: &str) {
