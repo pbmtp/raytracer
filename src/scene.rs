@@ -1,5 +1,6 @@
 use crate::aarect::{XyRect, XzRect, YzRect};
 use crate::camera::Camera;
+use crate::cube::Cube;
 use crate::hittable::Hittable;
 use crate::materials::{Dielectric, DiffuseLight, Lambertian, Metal};
 use crate::moving_sphere::MovingSphere;
@@ -156,6 +157,7 @@ impl Scene {
         let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
         let light = DiffuseLight::from(Color::new(15.0, 15.0, 15.0));
 
+        // The Box itself
         self.world.push(Box::new(YzRect {
             y0: 0.0,
             y1: 555.0,
@@ -207,6 +209,18 @@ impl Scene {
             k: 555.0,
             material: Box::new(white3),
         }));
+
+        // The inner rectangular boxes
+        self.world.push(Box::new(Cube::new(
+            Point3::new(130.0, 0.0, 65.0),
+            Point3::new(295.0, 165.0, 230.0),
+            Color::new(0.73, 0.73, 0.73),
+        )));
+        self.world.push(Box::new(Cube::new(
+            Point3::new(265.0, 0.0, 295.0),
+            Point3::new(430.0, 330.0, 460.0),
+            Color::new(0.73, 0.73, 0.73),
+        )));
     }
 
     fn create_simple_light(&mut self) {

@@ -16,6 +16,7 @@ use std::time::Instant;
 mod aabb;
 mod aarect;
 mod camera;
+mod cube;
 mod hittable;
 mod materials;
 mod moving_sphere;
