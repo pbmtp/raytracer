@@ -45,12 +45,13 @@ fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, depth: u32) ->
 
         let scatter = hr.material.scatter(&r, &hr);
         if let Some(bounce) = scatter.scattered {
-            return emitted + scatter.attenuation * ray_color(&bounce, background, world, depth - 1);
+            return emitted
+                + scatter.attenuation * ray_color(&bounce, background, world, depth - 1);
         }
 
         return emitted;
     }
-    
+
     *background
 }
 
