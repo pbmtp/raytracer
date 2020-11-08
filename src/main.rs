@@ -108,8 +108,7 @@ fn render(scene: &Scene, name: &str) {
 }
 
 fn main() {
-    // let scene = Scene::new(true, false);
-    let scene = Scene::new(false, false, SceneKind::SimpleLight, "data/1k/earth.jpg");
+    let scene = Scene::new(false, SceneKind::CornellBox, "data/1k/earth.jpg");
 
     let start = Instant::now();
     render(&scene, "out-test.png");

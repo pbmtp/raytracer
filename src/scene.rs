@@ -1,4 +1,4 @@
-use crate::aarect::XyRect;
+use crate::aarect::{XyRect, XzRect, YzRect};
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::materials::{Dielectric, DiffuseLight, Lambertian, Metal};
@@ -26,6 +26,7 @@ pub enum SceneKind {
     TwoPerlinSpheres,
     ImageSphere,
     SimpleLight,
+    CornellBox,
 }
 
 pub struct Scene {
@@ -36,69 +37,78 @@ pub struct Scene {
 }
 
 impl Config {
-    fn new(speed: bool, moving: bool) -> Config {
-        if speed {
-            let ratio: f64 = 16.0 / 9.0;
-            let width: usize = 800;
-            let height: usize = (width as f64 / ratio) as usize;
-            let samples_per_pixel: u32 = 100;
-            let max_depth: u32 = 50;
+    fn new(kind: &SceneKind, moving: bool) -> Config {
+        match kind {
+            SceneKind::CornellBox => {
+                let ratio: f64 = 1.0;
+                let width: usize = 600;
+                let height: usize = (width as f64 / ratio) as usize;
+                let samples_per_pixel: u32 = 200;
+                let max_depth: u32 = 50;
+                let time0 = 0.0;
+                let time1 = if moving { 1.0 } else { 0.0 };
 
-            Config {
-                ratio,
-                width,
-                height,
-                samples_per_pixel,
-                max_depth,
-                time0: 0.0,
-                time1: 0.0,
+                Config {
+                    ratio,
+                    width,
+                    height,
+                    samples_per_pixel,
+                    max_depth,
+                    time0,
+                    time1,
+                }
             }
-        } else {
-            let ratio: f64 = 3.0 / 2.0;
-            let width: usize = 1200;
-            let height: usize = (width as f64 / ratio) as usize;
-            let samples_per_pixel: u32 = 500;
-            let max_depth: u32 = 50;
-            let time0 = 0.0;
-            let time1 = if moving { 1.0 } else { 0.0 };
+            _ => {
+                let ratio: f64 = 3.0 / 2.0;
+                let width: usize = 1200;
+                let height: usize = (width as f64 / ratio) as usize;
+                let samples_per_pixel: u32 = 500;
+                let max_depth: u32 = 50;
+                let time0 = 0.0;
+                let time1 = if moving { 1.0 } else { 0.0 };
 
-            Config {
-                ratio,
-                width,
-                height,
-                samples_per_pixel,
-                max_depth,
-                time0,
-                time1,
+                Config {
+                    ratio,
+                    width,
+                    height,
+                    samples_per_pixel,
+                    max_depth,
+                    time0,
+                    time1,
+                }
             }
         }
     }
 }
 
 impl Scene {
-    pub fn new(speed: bool, moving: bool, kind: SceneKind, filename: &str) -> Scene {
+    pub fn new(moving: bool, kind: SceneKind, filename: &str) -> Scene {
         // Image config
-        let cfg = Config::new(speed, moving);
+        let cfg = Config::new(&kind, moving);
 
         // Camera
         let lookfrom = match kind {
             SceneKind::SimpleLight => Point3::new(26.0, 3.0, 6.0),
+            SceneKind::CornellBox => Point3::new(278.0, 278.0, -800.0),
             _ => Point3::new(13.0, 2.0, 3.0),
         };
 
         let lookat = match kind {
             SceneKind::SimpleLight => Point3::new(0.0, 2.0, 0.0),
+            SceneKind::CornellBox => Point3::new(278.0, 278.0, 0.0),
             _ => Point3::zero(),
         };
 
         let vup = Vec3::new(0.0, 1.0, 0.0);
-        let vfov = 20.0;
+        let vfov = match kind {
+            SceneKind::CornellBox => 40.0,
+            _ => 20.0,
+        };
         let dist_to_focus = 10.0;
         let aperture = match kind {
             SceneKind::RandomUniform | SceneKind::RandomChecker => 0.1,
             _ => 0.0,
         };
-        // FIXME vfov def: 40.0 (20.0 for TwoCheckerSphere and Random*)
 
         let camera = Camera::new(
             lookfrom,
@@ -113,7 +123,7 @@ impl Scene {
         );
 
         let background = match kind {
-            SceneKind::SimpleLight => Color::zero(),
+            SceneKind::SimpleLight | SceneKind::CornellBox => Color::zero(),
             _ => Color::new(0.7, 0.8, 1.0),
         };
 
@@ -132,9 +142,71 @@ impl Scene {
             SceneKind::TwoPerlinSpheres => scene.create_two_perlin_spheres(),
             SceneKind::ImageSphere => scene.create_image_sphere(filename),
             SceneKind::SimpleLight => scene.create_simple_light(),
+            SceneKind::CornellBox => scene.create_cornell_box(),
         }
 
         scene
+    }
+
+    fn create_cornell_box(&mut self) {
+        let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
+        let white = Lambertian::from(Color::new(0.73, 0.73, 0.73));
+        let white2 = Lambertian::from(Color::new(0.73, 0.73, 0.73));
+        let white3 = Lambertian::from(Color::new(0.73, 0.73, 0.73));
+        let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
+        let light = DiffuseLight::from(Color::new(15.0, 15.0, 15.0));
+
+        self.world.push(Box::new(YzRect {
+            y0: 0.0,
+            y1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 555.0,
+            material: Box::new(green),
+        }));
+        self.world.push(Box::new(YzRect {
+            y0: 0.0,
+            y1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 0.0,
+            material: Box::new(red),
+        }));
+
+        self.world.push(Box::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: Box::new(light),
+        }));
+
+        self.world.push(Box::new(XzRect {
+            x0: 0.0,
+            x1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 0.0,
+            material: Box::new(white),
+        }));
+        self.world.push(Box::new(XzRect {
+            x0: 0.0,
+            x1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 555.0,
+            material: Box::new(white2),
+        }));
+
+        self.world.push(Box::new(XyRect {
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 555.0,
+            material: Box::new(white3),
+        }));
     }
 
     fn create_simple_light(&mut self) {
