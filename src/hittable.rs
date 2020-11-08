@@ -66,6 +66,10 @@ impl<'a> HitRecord<'a> {
     pub fn get_v(self) -> f64 {
         self.v
     }
+
+    pub fn translate(&mut self, offset: Vec3) {
+        self.p += offset;
+    }
 }
 
 pub trait Hittable {

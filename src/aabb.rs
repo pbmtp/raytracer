@@ -1,6 +1,7 @@
 // Axis-Aligned Bounding Boxes
 use crate::ray::Ray;
-use crate::vec3::Point3;
+use crate::vec3::{Point3, Vec3};
+use std::ops::Add;
 
 #[derive(Copy, Clone)]
 pub struct Aabb {
@@ -60,5 +61,13 @@ impl Aabb {
         );
 
         Aabb::new(small, big)
+    }
+}
+
+impl Add<Vec3> for Aabb {
+    type Output = Self;
+
+    fn add(self, rhs: Vec3) -> Self {
+        Aabb::new(self.minimum + rhs, self.maximum + rhs)
     }
 }

@@ -7,6 +7,7 @@ use crate::moving_sphere::MovingSphere;
 use crate::sphere::Sphere;
 use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use crate::tools::{random_double, random_double_range};
+use crate::translate::Translate;
 use crate::vec3::{Color, Point3, Vec3};
 
 pub struct Config {
@@ -211,16 +212,21 @@ impl Scene {
         }));
 
         // The inner rectangular boxes
-        self.world.push(Box::new(Cube::new(
-            Point3::new(130.0, 0.0, 65.0),
-            Point3::new(295.0, 165.0, 230.0),
+        let b = Cube::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 330.0, 165.0),
             Color::new(0.73, 0.73, 0.73),
-        )));
-        self.world.push(Box::new(Cube::new(
-            Point3::new(265.0, 0.0, 295.0),
-            Point3::new(430.0, 330.0, 460.0),
+        );
+        let t = Translate::new(b, Vec3::new(265.0, 0.0, 295.0));
+        self.world.push(Box::new(t));
+
+        let b = Cube::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 165.0, 165.0),
             Color::new(0.73, 0.73, 0.73),
-        )));
+        );
+        let t = Translate::new(b, Vec3::new(130.0, 0.0, 65.0));
+        self.world.push(Box::new(t));
     }
 
     fn create_simple_light(&mut self) {

@@ -26,6 +26,7 @@ mod scene;
 mod sphere;
 mod texture;
 mod tools;
+mod translate;
 mod vec3;
 
 use hittable::Hittable;
