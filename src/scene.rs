@@ -4,6 +4,7 @@ use crate::cube::Cube;
 use crate::hittable::Hittable;
 use crate::materials::{Dielectric, DiffuseLight, Lambertian, Metal};
 use crate::moving_sphere::MovingSphere;
+use crate::rotate::RotateY;
 use crate::sphere::Sphere;
 use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use crate::tools::{random_double, random_double_range};
@@ -217,7 +218,8 @@ impl Scene {
             Point3::new(165.0, 330.0, 165.0),
             Color::new(0.73, 0.73, 0.73),
         );
-        let t = Translate::new(b, Vec3::new(265.0, 0.0, 295.0));
+        let r = RotateY::new(b, 15.0);
+        let t = Translate::new(r, Vec3::new(265.0, 0.0, 295.0));
         self.world.push(Box::new(t));
 
         let b = Cube::new(
@@ -225,7 +227,8 @@ impl Scene {
             Point3::new(165.0, 165.0, 165.0),
             Color::new(0.73, 0.73, 0.73),
         );
-        let t = Translate::new(b, Vec3::new(130.0, 0.0, 65.0));
+        let r = RotateY::new(b, -18.0);
+        let t = Translate::new(r, Vec3::new(130.0, 0.0, 65.0));
         self.world.push(Box::new(t));
     }
 

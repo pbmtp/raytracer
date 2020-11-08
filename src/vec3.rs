@@ -23,6 +23,20 @@ impl Vec3 {
     }
 
     #[inline]
+    pub fn max() -> Vec3 {
+        Vec3 {
+            e: [f64::MAX, f64::MAX, f64::MAX],
+        }
+    }
+
+    #[inline]
+    pub fn min() -> Vec3 {
+        Vec3 {
+            e: [-f64::MAX, -f64::MAX, -f64::MAX],
+        }
+    }
+
+    #[inline]
     pub fn new(r: f64, g: f64, b: f64) -> Vec3 {
         Vec3 { e: [r, g, b] }
     }

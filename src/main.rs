@@ -22,6 +22,7 @@ mod materials;
 mod moving_sphere;
 mod perlin;
 mod ray;
+mod rotate;
 mod scene;
 mod sphere;
 mod texture;
