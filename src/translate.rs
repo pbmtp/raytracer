@@ -4,13 +4,13 @@ use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 pub struct Translate<H: Hittable> {
-    hitable: H,
+    hittable: H,
     offset: Vec3,
 }
 
 impl<H: Hittable> Translate<H> {
-    pub fn new(hitable: H, offset: Vec3) -> Translate<H> {
-        Translate { hitable, offset }
+    pub fn new(hittable: H, offset: Vec3) -> Translate<H> {
+        Translate { hittable, offset }
     }
 }
 
@@ -18,7 +18,7 @@ impl<H: Hittable> Hittable for Translate<H> {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let moved_ray = Ray::new(r.origin() - self.offset, r.direction(), r.time());
 
-        if let Some(mut hr) = self.hitable.hit(&moved_ray, tmin, tmax) {
+        if let Some(mut hr) = self.hittable.hit(&moved_ray, tmin, tmax) {
             hr.translate(self.offset);
 
             return Some(hr);
@@ -28,7 +28,7 @@ impl<H: Hittable> Hittable for Translate<H> {
     }
 
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {
-        if let Some(b) = self.hitable.bounding_box(time0, time1) {
+        if let Some(b) = self.hittable.bounding_box(time0, time1) {
             return Some(b + self.offset);
         }
 
