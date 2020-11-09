@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 
 // https://raytracing.github.io/books/RayTracingInOneWeekend.html
+// https://raytracing.github.io/books/RayTracingTheNextWeek.html
+// TODO https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
 
 extern crate image;
 extern crate indicatif;
