@@ -21,6 +21,7 @@ mod camera;
 mod cube;
 mod hittable;
 mod materials;
+mod medium;
 mod moving_sphere;
 mod perlin;
 mod ray;
@@ -113,7 +114,7 @@ fn render(scene: &Scene, name: &str) {
 }
 
 fn main() {
-    let scene = Scene::new(false, SceneKind::CornellBox, "data/1k/earth.jpg");
+    let scene = Scene::new(false, SceneKind::CornellBoxSmoke, "data/1k/earth.jpg");
 
     let start = Instant::now();
     render(&scene, "out-test.png");
