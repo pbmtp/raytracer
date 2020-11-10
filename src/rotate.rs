@@ -81,14 +81,11 @@ impl<H: Hittable> Hittable for RotateY<H> {
             normal[0] = self.cos_theta * hr.get_normal()[0] + self.sin_theta * hr.get_normal()[2];
             normal[2] = -self.sin_theta * hr.get_normal()[0] + self.cos_theta * hr.get_normal()[2];
 
-            return Some(HitRecord::new(
-                p,
-                normal,
-                hr.get_t(),
-                hr.get_u(),
-                hr.get_v(),
-                hr.material,
-            ));
+            let mut hr_ret =
+                HitRecord::new(p, normal, hr.get_t(), hr.get_u(), hr.get_v(), hr.material);
+            hr_ret.set_front_face(&rotated_r, normal);
+
+            return Some(hr_ret);
         }
 
         None
