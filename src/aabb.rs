@@ -32,9 +32,7 @@ impl Aabb {
             let mut t1 = (self.max()[a] - r.origin()[a]) * inv_d;
 
             if inv_d < 0.0f64 {
-                let t = t0;
-                t0 = t1;
-                t1 = t;
+                std::mem::swap(&mut t0, &mut t1);
             }
 
             tmin = t0.max(tmin);

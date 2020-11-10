@@ -59,7 +59,7 @@ impl Perlin {
             temp_p *= 2.0;
         }
 
-        return accum.abs();
+        accum.abs()
     }
 
     fn interpolation(c: &[[[Point3; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {

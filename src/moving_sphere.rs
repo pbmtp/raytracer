@@ -51,7 +51,7 @@ impl Hittable for MovingSphere {
         let mut hr = HitRecord::new(p, Vec3::zero(), root, u, v, &*self.material);
         hr.set_front_face(&r, outward_normal);
 
-        return Some(hr);
+        Some(hr)
     }
 
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {

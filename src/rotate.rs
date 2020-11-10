@@ -49,12 +49,12 @@ impl<H: Hittable> RotateY<H> {
             };
         }
 
-        return RotateY {
+        RotateY {
             hittable,
             sin_theta,
             cos_theta,
             bbox: None,
-        };
+        }
     }
 }
 

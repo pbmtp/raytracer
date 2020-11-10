@@ -150,7 +150,7 @@ impl Vec3 {
     }
 
     pub fn to_u8_avg(self, samples_per_pixel: u32) -> [u8; 3] {
-        let mut c = self.clone();
+        let mut c = self;
         c /= samples_per_pixel as f64;
         c = c.clamp(0.0, 0.999) * 256f64;
 
@@ -158,7 +158,7 @@ impl Vec3 {
     }
 
     pub fn to_u8_avg_gamma2(self, samples_per_pixel: u32) -> [u8; 3] {
-        let mut c = self.clone();
+        let mut c = self;
         c /= samples_per_pixel as f64;
 
         let r = c.e[0].sqrt().clamp(0.0, 0.999) * 256f64;

@@ -38,7 +38,7 @@ impl Hittable for XyRect {
         let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
         hr.set_front_face(&r, outward_normal);
 
-        return Some(hr);
+        Some(hr)
     }
 
     fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<Aabb> {
@@ -84,7 +84,7 @@ impl Hittable for XzRect {
         let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
         hr.set_front_face(&r, outward_normal);
 
-        return Some(hr);
+        Some(hr)
     }
 
     fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<Aabb> {
@@ -130,7 +130,7 @@ impl Hittable for YzRect {
         let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
         hr.set_front_face(&r, outward_normal);
 
-        return Some(hr);
+        Some(hr)
     }
 
     fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<Aabb> {
