@@ -346,9 +346,9 @@ let pixels: Vec<u8> = (0..height)
 // bar.finish();
 */
 
-fn simple_scene() -> Vec<Box<dyn Hittable + Sync>> {
+fn simple_scene() -> Vec<Box<dyn Hittable>> {
     // World
-    let mut world: Vec<Box<dyn Hittable + Sync>> = Vec::new();
+    let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
     // ground
     let material_ground = Lambertian::from(Color::new(0.8, 0.8, 0.0));

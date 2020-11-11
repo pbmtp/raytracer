@@ -17,6 +17,7 @@ use std::time::Instant;
 
 mod aabb;
 mod aarect;
+mod bvh;
 mod camera;
 mod cube;
 mod hittable;
@@ -114,7 +115,7 @@ fn render(scene: &Scene, name: &str) {
 }
 
 fn main() {
-    let scene = Scene::new(false, SceneKind::CornellBoxSmoke, "data/1k/earth.jpg");
+    let scene = Scene::new(false, SceneKind::RandomUniform, "data/1k/earth.jpg");
 
     let start = Instant::now();
     render(&scene, "out-test.png");

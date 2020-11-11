@@ -1,4 +1,5 @@
 use crate::aarect::{XyRect, XzRect, YzRect};
+use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::cube::Cube;
 use crate::hittable::Hittable;
@@ -36,7 +37,7 @@ pub enum SceneKind {
 
 pub struct Scene {
     pub cfg: Config,
-    pub world: Vec<Box<dyn Hittable + Sync>>,
+    pub world: Vec<Box<dyn Hittable>>,
     pub camera: Camera,
     pub background: Color,
 }
@@ -423,11 +424,13 @@ impl Scene {
     }
 
     fn create_random(&mut self, kind: SceneKind) {
+        let mut world: Vec<Box<dyn Hittable>> = Vec::new();
+
         // ground
         match kind {
             SceneKind::RandomUniform => {
                 let material_ground = Lambertian::from(Color::new(0.5, 0.5, 0.5));
-                self.world.push(Box::new(Sphere {
+                world.push(Box::new(Sphere {
                     center: Point3::new(0.0, -100.5, -1.0),
                     radius: 100.0,
                     material: Box::new(material_ground),
@@ -439,7 +442,7 @@ impl Scene {
                 let material_ground = Lambertian {
                     albedo: Box::new(checker),
                 };
-                self.world.push(Box::new(Sphere {
+                world.push(Box::new(Sphere {
                     center: Point3::new(0.0, -1000.0, 0.0),
                     radius: 1000.0,
                     material: Box::new(material_ground),
@@ -467,7 +470,7 @@ impl Scene {
                         let sphere_material = Lambertian::from(albedo);
                         if self.cfg.time0 == self.cfg.time1 {
                             // simple sphere
-                            self.world.push(Box::new(Sphere {
+                            world.push(Box::new(Sphere {
                                 center,
                                 radius: 0.2,
                                 material: Box::new(sphere_material),
@@ -476,7 +479,7 @@ impl Scene {
                             // moving sphere
                             let center2 =
                                 center + Vec3::new(0.0, random_double_range(0.0, 0.5), 0.0);
-                            self.world.push(Box::new(MovingSphere {
+                            world.push(Box::new(MovingSphere {
                                 center0: center,
                                 center1: center2,
                                 time0: 0.0,
@@ -490,7 +493,7 @@ impl Scene {
                         let albedo = Color::random_range(0.5, 1.0);
                         let fuzz = random_double_range(0.0, 0.5);
                         let sphere_material = Metal::new(albedo, fuzz);
-                        self.world.push(Box::new(Sphere {
+                        world.push(Box::new(Sphere {
                             center,
                             radius: 0.2,
                             material: Box::new(sphere_material),
@@ -498,7 +501,7 @@ impl Scene {
                     } else {
                         // glass
                         let sphere_material = Dielectric::new(1.5);
-                        self.world.push(Box::new(Sphere {
+                        world.push(Box::new(Sphere {
                             center,
                             radius: 0.2,
                             material: Box::new(sphere_material),
@@ -510,24 +513,34 @@ impl Scene {
 
         // fixed part
         let material1 = Dielectric::new(1.5);
-        self.world.push(Box::new(Sphere {
+        world.push(Box::new(Sphere {
             center: Point3::new(0.0, 1.0, 0.0),
             radius: 1.0,
             material: Box::new(material1),
         }));
 
         let material2 = Lambertian::from(Color::new(0.4, 0.2, 0.1));
-        self.world.push(Box::new(Sphere {
+        world.push(Box::new(Sphere {
             center: Point3::new(-4.0, 1.0, 0.0),
             radius: 1.0,
             material: Box::new(material2),
         }));
 
         let material3 = Metal::new(Color::new(0.7, 0.6, 0.5), 0.0);
-        self.world.push(Box::new(Sphere {
+        world.push(Box::new(Sphere {
             center: Point3::new(4.0, 1.0, 0.0),
             radius: 1.0,
             material: Box::new(material3),
         }));
+
+        // Without Bvh
+        // self.world.append(&mut world);
+
+        // With Bvh to speedup render
+        self.world.push(Box::new(BvhNode::new(
+            world,
+            self.cfg.time0,
+            self.cfg.time1,
+        )));
     }
 }

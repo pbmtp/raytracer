@@ -72,12 +72,12 @@ impl<'a> HitRecord<'a> {
     }
 }
 
-pub trait Hittable {
+pub trait Hittable : Sync {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb>;
 }
 
-impl Hittable for Vec<Box<dyn Hittable + Sync>> {
+impl Hittable for Vec<Box<dyn Hittable>> {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let mut closest = None;
         let mut closest_so_far = tmax;

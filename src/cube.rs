@@ -8,7 +8,7 @@ use crate::vec3::{Color, Point3};
 pub struct Cube {
     p_min: Point3,
     p_max: Point3,
-    sides: Vec<Box<dyn Hittable + Sync>>,
+    sides: Vec<Box<dyn Hittable>>,
 }
 
 impl Cube {
