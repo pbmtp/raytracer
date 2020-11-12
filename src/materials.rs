@@ -61,7 +61,7 @@ impl Metal {
 
 impl Material for Metal {
     fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
-        let reflected = Vec3::reflect(&ray.direction(), &hr.get_normal());
+        let reflected = Vec3::reflect(&ray.direction().to_unit_vector(), &hr.get_normal());
         let scattered = Ray::new(
             hr.get_p(),
             reflected + self.fuzz * Vec3::random_in_unit_sphere(),
