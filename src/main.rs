@@ -115,7 +115,7 @@ fn render(scene: &Scene, name: &str) {
 }
 
 fn main() {
-    let scene = Scene::new(false, SceneKind::RandomUniform, "data/1k/earth.jpg");
+    let scene = Scene::new(false, SceneKind::FinalScene, "data/1k/earth.jpg");
 
     let start = Instant::now();
     render(&scene, "out-test.png");

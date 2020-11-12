@@ -33,6 +33,7 @@ pub enum SceneKind {
     SimpleLight,
     CornellBox,
     CornellBoxSmoke,
+    FinalScene,
 }
 
 pub struct Scene {
@@ -53,6 +54,25 @@ impl Config {
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = if moving { 1.0 } else { 0.0 };
+
+                Config {
+                    ratio,
+                    width,
+                    height,
+                    samples_per_pixel,
+                    max_depth,
+                    time0,
+                    time1,
+                }
+            }
+            SceneKind::FinalScene => {
+                let ratio: f64 = 1.0;
+                let width: usize = 1200;
+                let height: usize = (width as f64 / ratio) as usize;
+                let samples_per_pixel: u32 = 1000; /* <100: 1min, <500: 8mins, <1000: 15mins, 10K: XXmins */
+                let max_depth: u32 = 50;
+                let time0 = 0.0;
+                let time1 = 1.0;
 
                 Config {
                     ratio,
@@ -96,18 +116,20 @@ impl Scene {
         let lookfrom = match kind {
             SceneKind::SimpleLight => Point3::new(26.0, 3.0, 6.0),
             SceneKind::CornellBox | SceneKind::CornellBoxSmoke => Point3::new(278.0, 278.0, -800.0),
+            SceneKind::FinalScene => Point3::new(478.0, 278.0, -600.0),
             _ => Point3::new(13.0, 2.0, 3.0),
         };
 
         let lookat = match kind {
             SceneKind::SimpleLight => Point3::new(0.0, 2.0, 0.0),
             SceneKind::CornellBox | SceneKind::CornellBoxSmoke => Point3::new(278.0, 278.0, 0.0),
+            SceneKind::FinalScene => Point3::new(278.0, 278.0, 0.0),
             _ => Point3::zero(),
         };
 
         let vup = Vec3::new(0.0, 1.0, 0.0);
         let vfov = match kind {
-            SceneKind::CornellBox | SceneKind::CornellBoxSmoke => 40.0,
+            SceneKind::CornellBox | SceneKind::CornellBoxSmoke | SceneKind::FinalScene => 40.0,
             _ => 20.0,
         };
         let dist_to_focus = 10.0;
@@ -129,9 +151,10 @@ impl Scene {
         );
 
         let background = match kind {
-            SceneKind::SimpleLight | SceneKind::CornellBox | SceneKind::CornellBoxSmoke => {
-                Color::zero()
-            }
+            SceneKind::SimpleLight
+            | SceneKind::CornellBox
+            | SceneKind::CornellBoxSmoke
+            | SceneKind::FinalScene => Color::zero(),
             _ => Color::new(0.7, 0.8, 1.0),
         };
 
@@ -152,10 +175,154 @@ impl Scene {
             SceneKind::SimpleLight => scene.create_simple_light(),
             SceneKind::CornellBox => scene.create_cornell_box(),
             SceneKind::CornellBoxSmoke => scene.create_cornell_box_smoke(),
+            SceneKind::FinalScene => scene.create_final_scene(filename),
         }
 
         scene
     }
+
+    fn create_final_scene(&mut self, filename: &str) {
+        // random boxes for ground
+        let mut boxes1: Vec<Box<dyn Hittable>> = Vec::new();
+        let boxes_per_side = 20;
+        for i in 0..boxes_per_side {
+            for j in 0..boxes_per_side {
+                let w = 100.0;
+                let x0 = -1000.0 + i as f64 * w;
+                let z0 = -1000.0 + j as f64 * w;
+                let y0 = 0.0;
+                let x1 = x0 + w;
+                let y1 = random_double_range(1.0, 101.0);
+                let z1 = z0 + w;
+
+                let b = Cube::new(
+                    Point3::new(x0, y0, z0),
+                    Point3::new(x1, y1, z1),
+                    Color::new(0.48, 0.83, 0.53),
+                );
+
+                boxes1.push(Box::new(b));
+            }
+        }
+        self.world.push(Box::new(BvhNode::new(
+            boxes1,
+            self.cfg.time0,
+            self.cfg.time1,
+        )));
+
+        // light
+        let light = DiffuseLight::from(Color::new(7.0, 7.0, 7.0));
+        self.world.push(Box::new(XzRect {
+            x0: 123.0,
+            x1: 423.0,
+            z0: 147.0,
+            z1: 412.0,
+            k: 554.0,
+            material: Box::new(light),
+        }));
+
+        // moving sphere
+        let center1 = Point3::new(400.0, 400.0, 200.0);
+        let center2 = center1 + Vec3::new(30.0, 0.0, 0.0);
+        let moving_sphere_material = Lambertian::from(Color::new(0.7, 0.3, 0.1));
+        self.world.push(Box::new(MovingSphere {
+            center0: center1,
+            center1: center2,
+            time0: 0.0,
+            time1: 1.0,
+            radius: 50.0,
+            material: Box::new(moving_sphere_material),
+        }));
+
+        // dielectric sphere
+        let dielectric_material = Dielectric::new(1.5);
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(260.0, 150.0, 45.0),
+            radius: 50.0,
+            material: Box::new(dielectric_material),
+        }));
+
+        // metal sphere
+        let metal_material = Metal::new(Color::new(0.8, 0.8, 0.9), 1.0);
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(0.0, 150.0, 145.0),
+            radius: 50.0,
+            material: Box::new(metal_material),
+        }));
+
+        //  blue subsurface reflection sphere
+        let dielectric_material = Dielectric::new(1.5);
+        let boundary = Sphere {
+            center: Point3::new(360.0, 150.0, 145.0),
+            radius: 70.0,
+            material: Box::new(dielectric_material),
+        };
+        self.world.push(Box::new(boundary));
+        let dielectric_material = Dielectric::new(1.5);
+        let boundary = Sphere {
+            center: Point3::new(360.0, 150.0, 145.0),
+            radius: 70.0,
+            material: Box::new(dielectric_material),
+        };
+        let medium = ConstantMedium {
+            boundary,
+            density: 0.2,
+            phase_function: Isotropic::from(Color::new(0.2, 0.4, 0.9)),
+        };
+        self.world.push(Box::new(medium));
+
+        // mist
+        let dielectric_material = Dielectric::new(1.5);
+        let boundary = Sphere {
+            center: Point3::new(0.0, 0.0, 0.0),
+            radius: 5000.0,
+            material: Box::new(dielectric_material),
+        };
+        let medium = ConstantMedium {
+            boundary,
+            density: 0.0001,
+            phase_function: Isotropic::from(Color::new(1.0, 1.0, 1.0)),
+        };
+        self.world.push(Box::new(medium));
+
+        // earth mapped sphere
+        let emat = Lambertian {
+            albedo: Box::new(ImageTexture::new(filename)),
+        };
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(400.0, 200.0, 400.0),
+            radius: 100.0,
+            material: Box::new(emat),
+        }));
+
+        // perlin noise sphere
+        let noise = NoiseTexture::from(0.1);
+        let material_noise = Lambertian {
+            albedo: Box::new(noise),
+        };
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(220.0, 280.0, 300.0),
+            radius: 80.0,
+            material: Box::new(material_noise),
+        }));
+
+        // random sphere within a box
+        let mut boxes2: Vec<Box<dyn Hittable>> = Vec::new();
+        let ns = 1000;
+        for _i in 0..ns {
+            let white = Lambertian::from(Color::new(0.73, 0.73, 0.73));
+            boxes2.push(Box::new(Sphere {
+                center: Point3::random_range(0.0, 165.0),
+                radius: 10.0,
+                material: Box::new(white),
+            }));
+        }
+        let bvh = BvhNode::new(boxes2, self.cfg.time0, self.cfg.time1);
+        let rotated = RotateY::new(bvh, 15.0);
+        let translated = Translate::new(rotated, Vec3::new(-100.0, 270.0, 395.0));
+        self.world.push(Box::new(translated));
+    }
+
     fn create_cornell_box_smoke(&mut self) {
         let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
         let white = Lambertian::from(Color::new(0.73, 0.73, 0.73));
