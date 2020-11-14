@@ -13,5 +13,5 @@ pub fn random_double() -> f64 {
 pub fn random_usize_range(min: usize, max: usize) -> usize {
     let mut rng = rand::thread_rng();
 
-    rng.gen_range(min, max)
+    rng.gen_range(min, max + 1)
 }
