@@ -5,10 +5,12 @@ use crate::vec3::{Color, Point3};
 
 const BYTES_PER_PIXEL: usize = 3;
 
+// Generic trait
 pub trait Texture: Sync {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color;
 }
 
+// Uniform Color
 pub struct SolidTexture {
     color: Color,
 }
@@ -32,6 +34,8 @@ impl Texture for SolidTexture {
         self.color
     }
 }
+
+// Checker texture (alternating between two textures)
 pub struct CheckerTexture {
     pub odd: Box<dyn Texture>,
     pub even: Box<dyn Texture>,
@@ -48,8 +52,9 @@ impl From<(Color, Color)> for CheckerTexture {
 
 impl Texture for CheckerTexture {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color {
+        let sines = (10.0 * p.x()).sin() * (10.0 * p.y()).sin() * (10.0 * p.z()).sin();
+
         // https://github.com/RayTracing/raytracing.github.io/issues/663
-        let sines = (p.x() * 10.0).sin() * (p.y() * 10.0).sin() * (p.z() * 10.0).sin();
         // let sines = (u * 10.0).sin() * (v * 10.0).sin() * (p.z() * 10.0).sin();
 
         if sines < 0.0 {
@@ -60,6 +65,7 @@ impl Texture for CheckerTexture {
     }
 }
 
+// NoiseTexture using Perlin as noise source
 pub struct NoiseTexture {
     noise: Perlin,
     scale: f64,
@@ -91,6 +97,7 @@ impl Texture for NoiseTexture {
     }
 }
 
+// Mapped image texture
 pub struct ImageTexture {
     data: Vec<u8>,
     width: usize,
