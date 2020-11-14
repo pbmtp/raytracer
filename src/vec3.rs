@@ -59,6 +59,7 @@ impl Vec3 {
         }
     }
 
+    #[inline]
     pub fn random_in_unit_sphere() -> Vec3 {
         loop {
             let p = Vec3::random_range(-1.0, 1.0);
@@ -69,10 +70,12 @@ impl Vec3 {
         }
     }
 
+    #[inline]
     pub fn random_unit_vector() -> Vec3 {
         Vec3::random_in_unit_sphere().to_unit_vector()
     }
 
+    #[inline]
     pub fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
         let in_unit_sphere = Vec3::random_in_unit_sphere();
         if in_unit_sphere.dot(*normal) > 0.0 {
@@ -80,6 +83,22 @@ impl Vec3 {
             in_unit_sphere
         } else {
             -in_unit_sphere
+        }
+    }
+
+    #[inline]
+    pub fn random_in_unit_disk() -> Vec3 {
+        loop {
+            let p = Vec3::new(
+                random_double_range(-1.0, 1.0),
+                random_double_range(-1.0, 1.0),
+                0.0,
+            );
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+
+            return p;
         }
     }
 
