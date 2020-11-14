@@ -54,7 +54,7 @@ impl Hittable for Sphere {
             }
         }
 
-        let p = r.point_at(root);
+        let p = r.at(root);
         let outward_normal = (p - self.center) / self.radius;
         let (u, v) = Sphere::get_uv(&outward_normal);
 

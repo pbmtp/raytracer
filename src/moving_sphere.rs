@@ -44,7 +44,7 @@ impl Hittable for MovingSphere {
             }
         }
 
-        let p = r.point_at(root);
+        let p = r.at(root);
         let outward_normal = (p - self.center(r.time())) / self.radius;
         let (u, v) = Sphere::get_uv(&outward_normal);
 

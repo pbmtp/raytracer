@@ -28,7 +28,7 @@ impl<H: Hittable> Hittable for ConstantMedium<H> {
                         let t = t1 + hit_distance / ray_length;
 
                         return Some(HitRecord::new(
-                            r.point_at(t),
+                            r.at(t),
                             Vec3::new(1.0, 0.0, 0.0),
                             t,
                             0.0,

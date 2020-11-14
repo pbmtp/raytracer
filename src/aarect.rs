@@ -33,7 +33,7 @@ impl Hittable for XyRect {
         let v = (y - self.y0) / (self.y1 - self.y0);
         let t = t;
         let outward_normal = Vec3::new(0.0, 0.0, 1.0);
-        let p = r.point_at(t);
+        let p = r.at(t);
 
         let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
         hr.set_front_face(&r, outward_normal);
@@ -79,7 +79,7 @@ impl Hittable for XzRect {
         let v = (z - self.z0) / (self.z1 - self.z0);
         let t = t;
         let outward_normal = Vec3::new(0.0, 1.0, 0.0);
-        let p = r.point_at(t);
+        let p = r.at(t);
 
         let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
         hr.set_front_face(&r, outward_normal);
@@ -125,7 +125,7 @@ impl Hittable for YzRect {
         let v = (z - self.z0) / (self.z1 - self.z0);
         let t = t;
         let outward_normal = Vec3::new(1.0, 0.0, 0.0);
-        let p = r.point_at(t);
+        let p = r.at(t);
 
         let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
         hr.set_front_face(&r, outward_normal);
