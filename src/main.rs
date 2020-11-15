@@ -124,3 +124,11 @@ fn main() {
         HumanDuration(start.elapsed())
     );
 }
+
+// aabb ok
+// camera ok (apres fix)
+// perlin ok
+// ray ok
+// texture ok
+// medium ok
+

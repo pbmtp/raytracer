@@ -15,8 +15,8 @@ impl<H: Hittable> Hittable for ConstantMedium<H> {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         if let Some(hit1) = self.boundary.hit(&r, f64::MIN, f64::MAX) {
             if let Some(hit2) = self.boundary.hit(&r, hit1.get_t() + 0.0001, f64::MAX) {
-                let mut t1 = hit1.get_t().min(tmin);
-                let t2 = hit2.get_t().max(tmax);
+                let mut t1 = hit1.get_t().max(tmin);
+                let t2 = hit2.get_t().min(tmax);
                 if t1 < t2 {
                     if t1 < 0.0 {
                         t1 = 0.0;

@@ -69,7 +69,7 @@ impl Config {
                 let ratio: f64 = 1.0;
                 let width: usize = 1000;
                 let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 10000; /* <100: 1min, <500: 8mins, <1000: 15mins, 10K: 60mins */
+                let samples_per_pixel: u32 = 1000; /* <100: 1min, <500: 8mins, <1000: 15mins, 10K: 60mins */
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = 1.0;
@@ -394,7 +394,7 @@ impl Scene {
         let translated = Translate::new(rotated, Vec3::new(265.0, 0.0, 295.0));
         let smoke = ConstantMedium {
             boundary: translated,
-            density: 0.001,
+            density: 0.01,
             phase_function: Isotropic::from(Color::zero()),
         };
         self.world.push(Box::new(smoke));
@@ -408,7 +408,7 @@ impl Scene {
         let translated = Translate::new(rotated, Vec3::new(130.0, 0.0, 65.0));
         let smoke = ConstantMedium {
             boundary: translated,
-            density: 0.001,
+            density: 0.01,
             phase_function: Isotropic::from(Color::new(1.0, 1.0, 1.0)),
         };
         self.world.push(Box::new(smoke));
