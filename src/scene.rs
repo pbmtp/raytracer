@@ -69,7 +69,7 @@ impl Config {
                 let ratio: f64 = 1.0;
                 let width: usize = 1000;
                 let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 1000; /* <100: 1min, <500: 8mins, <1000: 15mins, 10K: 60mins */
+                let samples_per_pixel: u32 = 1000; /* <100: 1min, <500: 8mins, <1000: 15mins, 10K: 4hours */
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = 1.0;
