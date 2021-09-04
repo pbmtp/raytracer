@@ -1,4 +1,4 @@
-#![feature(clamp)]
+//#![feature(clamp)]
 #![allow(dead_code)]
 
 // https://raytracing.github.io/books/RayTracingInOneWeekend.html
@@ -10,7 +10,7 @@ extern crate indicatif;
 extern crate rand;
 extern crate rayon;
 
-use indicatif::{HumanDuration, ProgressBar};
+use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 
 use std::time::Instant;
@@ -75,7 +75,12 @@ fn render(scene: &Scene, name: &str) {
     let mut pixels = vec![0u8; len];
 
     // FIXME https://docs.rs/indicatif/0.15.0/indicatif/#iterators
-    let bar = ProgressBar::new(width as u64 * height as u64);
+    let bar_len = width as u64 * height as u64;
+    let bar = ProgressBar::new(bar_len);
+    bar.set_style(ProgressStyle::default_bar().template(
+        "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",
+    ));
+    bar.set_draw_delta( bar_len / 100);
     pixels
         .par_chunks_mut(BYTES_PER_PIXEL)
         .into_par_iter()
@@ -131,4 +136,3 @@ fn main() {
 // ray ok
 // texture ok
 // medium ok
-
