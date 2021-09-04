@@ -5,11 +5,6 @@
 // https://raytracing.github.io/books/RayTracingTheNextWeek.html
 // TODO https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
 
-extern crate image;
-extern crate indicatif;
-extern crate rand;
-extern crate rayon;
-
 use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 
