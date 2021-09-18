@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::Isotropic;
@@ -8,13 +10,13 @@ use crate::vec3::Vec3;
 pub struct ConstantMedium<H: Hittable> {
     pub boundary: H,
     pub density: f64,
-    pub phase_function: Isotropic,
+    pub phase_function: Arc<Isotropic>,
 }
 
 impl<H: Hittable> Hittable for ConstantMedium<H> {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
-        if let Some(hit1) = self.boundary.hit(&r, f64::MIN, f64::MAX) {
-            if let Some(hit2) = self.boundary.hit(&r, hit1.get_t() + 0.0001, f64::MAX) {
+        if let Some(hit1) = self.boundary.hit(r, f64::MIN, f64::MAX) {
+            if let Some(hit2) = self.boundary.hit(r, hit1.get_t() + 0.0001, f64::MAX) {
                 let mut t1 = hit1.get_t().max(tmin);
                 let t2 = hit2.get_t().min(tmax);
                 if t1 < t2 {
@@ -33,7 +35,7 @@ impl<H: Hittable> Hittable for ConstantMedium<H> {
                             t,
                             0.0,
                             0.0,
-                            &self.phase_function,
+                            self.phase_function.clone(),
                         ));
                     }
                 }

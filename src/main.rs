@@ -43,10 +43,10 @@ fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, depth: u32) ->
         return Color::zero();
     }
 
-    if let Some(hr) = world.hit(&r, 0.001, std::f64::INFINITY) {
+    if let Some(hr) = world.hit(r, 0.001, std::f64::INFINITY) {
         let emitted = hr.material.emitted(hr.get_u(), hr.get_v(), &hr.get_p());
 
-        let scatter = hr.material.scatter(&r, &hr);
+        let scatter = hr.material.scatter(r, &hr);
         if let Some(bounce) = scatter.scattered {
             return emitted
                 + scatter.attenuation * ray_color(&bounce, background, world, depth - 1);

@@ -1,4 +1,5 @@
 use std::f64::consts::PI;
+use std::sync::Arc;
 
 use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
@@ -9,7 +10,7 @@ use crate::vec3::{Point3, Vec3};
 pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
-    pub material: Box<dyn Material>,
+    pub material: Arc<dyn Material>,
 }
 
 impl Sphere {
@@ -58,8 +59,8 @@ impl Hittable for Sphere {
         let outward_normal = (p - self.center) / self.radius;
         let (u, v) = Sphere::get_uv(&outward_normal);
 
-        let mut hr = HitRecord::new(p, Vec3::zero(), root, u, v, &*self.material);
-        hr.set_front_face(&r, outward_normal);
+        let mut hr = HitRecord::new(p, Vec3::zero(), root, u, v, self.material.clone());
+        hr.set_front_face(r, outward_normal);
 
         Some(hr)
     }

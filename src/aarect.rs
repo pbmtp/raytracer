@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 // Axis-Aligned Rectangles
 use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
@@ -12,7 +14,7 @@ pub struct XyRect {
     pub y0: f64,
     pub y1: f64,
     pub k: f64,
-    pub material: Box<dyn Material>,
+    pub material: Arc<dyn Material>,
 }
 
 impl Hittable for XyRect {
@@ -35,8 +37,8 @@ impl Hittable for XyRect {
         let outward_normal = Vec3::new(0.0, 0.0, 1.0);
         let p = r.at(t);
 
-        let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
-        hr.set_front_face(&r, outward_normal);
+        let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, self.material.clone());
+        hr.set_front_face(r, outward_normal);
 
         Some(hr)
     }
@@ -58,7 +60,7 @@ pub struct XzRect {
     pub z0: f64,
     pub z1: f64,
     pub k: f64,
-    pub material: Box<dyn Material>,
+    pub material: Arc<dyn Material>,
 }
 
 impl Hittable for XzRect {
@@ -81,8 +83,8 @@ impl Hittable for XzRect {
         let outward_normal = Vec3::new(0.0, 1.0, 0.0);
         let p = r.at(t);
 
-        let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
-        hr.set_front_face(&r, outward_normal);
+        let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, self.material.clone());
+        hr.set_front_face(r, outward_normal);
 
         Some(hr)
     }
@@ -104,7 +106,7 @@ pub struct YzRect {
     pub z0: f64,
     pub z1: f64,
     pub k: f64,
-    pub material: Box<dyn Material>,
+    pub material: Arc<dyn Material>,
 }
 
 impl Hittable for YzRect {
@@ -127,8 +129,8 @@ impl Hittable for YzRect {
         let outward_normal = Vec3::new(1.0, 0.0, 0.0);
         let p = r.at(t);
 
-        let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, &*self.material);
-        hr.set_front_face(&r, outward_normal);
+        let mut hr = HitRecord::new(p, Vec3::zero(), t, u, v, self.material.clone());
+        hr.set_front_face(r, outward_normal);
 
         Some(hr)
     }

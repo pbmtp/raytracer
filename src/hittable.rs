@@ -1,28 +1,30 @@
+use std::sync::Arc;
+
 use crate::aabb::Aabb;
 use crate::materials::Material;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
-#[derive(Clone, Copy)]
-pub struct HitRecord<'a> {
+#[derive(Clone)]
+pub struct HitRecord {
     p: Point3,
     normal: Vec3,
     t: f64,
     u: f64,
     v: f64,
     front_face: bool,
-    pub material: &'a dyn Material,
+    pub material: Arc<dyn Material>,
 }
 
-impl<'a> HitRecord<'a> {
+impl HitRecord {
     pub fn new(
         p: Point3,
         normal: Vec3,
         t: f64,
         u: f64,
         v: f64,
-        mat: &'a dyn Material,
-    ) -> HitRecord<'a> {
+        mat: Arc<dyn Material>,
+    ) -> HitRecord {
         HitRecord {
             p,
             normal,
@@ -43,27 +45,27 @@ impl<'a> HitRecord<'a> {
         };
     }
 
-    pub fn is_front(self) -> bool {
+    pub fn is_front(&self) -> bool {
         self.front_face
     }
 
-    pub fn get_p(self) -> Point3 {
+    pub fn get_p(&self) -> Point3 {
         self.p
     }
 
-    pub fn get_normal(self) -> Vec3 {
+    pub fn get_normal(&self) -> Vec3 {
         self.normal
     }
 
-    pub fn get_t(self) -> f64 {
+    pub fn get_t(&self) -> f64 {
         self.t
     }
 
-    pub fn get_u(self) -> f64 {
+    pub fn get_u(&self) -> f64 {
         self.u
     }
 
-    pub fn get_v(self) -> f64 {
+    pub fn get_v(&self) -> f64 {
         self.v
     }
 

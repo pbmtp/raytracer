@@ -1,9 +1,11 @@
+use std::sync::Arc;
+
 use crate::aarect::{XyRect, XzRect, YzRect};
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::cube::Cube;
 use crate::hittable::Hittable;
-use crate::materials::{Dielectric, DiffuseLight, Isotropic, Lambertian, Metal};
+use crate::materials::{Dielectric, DiffuseLight, Isotropic, Lambertian, Material, Metal};
 use crate::medium::ConstantMedium;
 use crate::moving_sphere::MovingSphere;
 use crate::rotate::RotateY;
@@ -88,7 +90,7 @@ impl Config {
                 let ratio: f64 = 3.0 / 2.0;
                 let width: usize = 1200;
                 let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 500;
+                let samples_per_pixel: u32 = 500; // def: 500
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = if moving { 1.0 } else { 0.0 };
@@ -218,7 +220,7 @@ impl Scene {
             z0: 147.0,
             z1: 412.0,
             k: 554.0,
-            material: Box::new(light),
+            material: Arc::new(light),
         }));
 
         // moving sphere
@@ -231,15 +233,15 @@ impl Scene {
             time0: 0.0,
             time1: 1.0,
             radius: 50.0,
-            material: Box::new(moving_sphere_material),
+            material: Arc::new(moving_sphere_material),
         }));
 
         // dielectric sphere
-        let dielectric_material = Dielectric::new(1.5);
+        let dielectric_material: Arc<dyn Material> = Arc::new(Dielectric::new(1.5));
         self.world.push(Box::new(Sphere {
             center: Point3::new(260.0, 150.0, 45.0),
             radius: 50.0,
-            material: Box::new(dielectric_material),
+            material: dielectric_material.clone(),
         }));
 
         // metal sphere
@@ -247,52 +249,49 @@ impl Scene {
         self.world.push(Box::new(Sphere {
             center: Point3::new(0.0, 150.0, 145.0),
             radius: 50.0,
-            material: Box::new(metal_material),
+            material: Arc::new(metal_material),
         }));
 
         //  blue subsurface reflection sphere
-        let dielectric_material = Dielectric::new(1.5);
         let boundary = Sphere {
             center: Point3::new(360.0, 150.0, 145.0),
             radius: 70.0,
-            material: Box::new(dielectric_material),
+            material: dielectric_material.clone(),
         };
         self.world.push(Box::new(boundary));
-        let dielectric_material = Dielectric::new(1.5);
         let boundary = Sphere {
             center: Point3::new(360.0, 150.0, 145.0),
             radius: 70.0,
-            material: Box::new(dielectric_material),
+            material: dielectric_material.clone(),
         };
         let medium = ConstantMedium {
             boundary,
             density: 0.2,
-            phase_function: Isotropic::from(Color::new(0.2, 0.4, 0.9)),
+            phase_function: Arc::new(Isotropic::from(Color::new(0.2, 0.4, 0.9))),
         };
         self.world.push(Box::new(medium));
 
         // mist
-        let dielectric_material = Dielectric::new(1.5);
         let boundary = Sphere {
             center: Point3::new(0.0, 0.0, 0.0),
             radius: 5000.0,
-            material: Box::new(dielectric_material),
+            material: dielectric_material.clone(),
         };
         let medium = ConstantMedium {
             boundary,
             density: 0.0001,
-            phase_function: Isotropic::from(Color::new(1.0, 1.0, 1.0)),
+            phase_function: Arc::new(Isotropic::from(Color::new(1.0, 1.0, 1.0))),
         };
         self.world.push(Box::new(medium));
 
         // earth mapped sphere
-        let emat = Lambertian {
+        let earth_mat = Lambertian {
             albedo: Box::new(ImageTexture::new(filename)),
         };
         self.world.push(Box::new(Sphere {
             center: Point3::new(400.0, 200.0, 400.0),
             radius: 100.0,
-            material: Box::new(emat),
+            material: Arc::new(earth_mat),
         }));
 
         // perlin noise sphere
@@ -303,18 +302,18 @@ impl Scene {
         self.world.push(Box::new(Sphere {
             center: Point3::new(220.0, 280.0, 300.0),
             radius: 80.0,
-            material: Box::new(material_noise),
+            material: Arc::new(material_noise),
         }));
 
         // random sphere within a box
         let mut boxes2: Vec<Box<dyn Hittable>> = Vec::new();
         let ns = 1000;
+        let white: Arc<dyn Material> = Arc::new(Lambertian::from(Color::new(0.73, 0.73, 0.73)));
         for _i in 0..ns {
-            let white = Lambertian::from(Color::new(0.73, 0.73, 0.73));
             boxes2.push(Box::new(Sphere {
                 center: Point3::random_range(0.0, 165.0),
                 radius: 10.0,
-                material: Box::new(white),
+                material: white.clone(),
             }));
         }
         let bvh = BvhNode::new(boxes2, self.cfg.time0, self.cfg.time1);
@@ -325,9 +324,7 @@ impl Scene {
 
     fn create_cornell_box_smoke(&mut self) {
         let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
-        let white = Lambertian::from(Color::new(0.73, 0.73, 0.73));
-        let white2 = Lambertian::from(Color::new(0.73, 0.73, 0.73));
-        let white3 = Lambertian::from(Color::new(0.73, 0.73, 0.73));
+        let white: Arc<dyn Material> = Arc::new(Lambertian::from(Color::new(0.73, 0.73, 0.73)));
         let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
         let light = DiffuseLight::from(Color::new(7.0, 7.0, 7.0));
 
@@ -338,7 +335,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 555.0,
-            material: Box::new(green),
+            material: Arc::new(green),
         }));
         self.world.push(Box::new(YzRect {
             y0: 0.0,
@@ -346,7 +343,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 0.0,
-            material: Box::new(red),
+            material: Arc::new(red),
         }));
 
         self.world.push(Box::new(XzRect {
@@ -355,7 +352,7 @@ impl Scene {
             z0: 127.0,
             z1: 432.0,
             k: 554.0,
-            material: Box::new(light),
+            material: Arc::new(light),
         }));
 
         self.world.push(Box::new(XzRect {
@@ -364,7 +361,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 0.0,
-            material: Box::new(white),
+            material: white.clone(),
         }));
         self.world.push(Box::new(XzRect {
             x0: 0.0,
@@ -372,7 +369,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 555.0,
-            material: Box::new(white2),
+            material: white.clone(),
         }));
 
         self.world.push(Box::new(XyRect {
@@ -381,7 +378,7 @@ impl Scene {
             y0: 0.0,
             y1: 555.0,
             k: 555.0,
-            material: Box::new(white3),
+            material: white.clone(),
         }));
 
         // The inner rectangular boxes with smoke
@@ -395,7 +392,7 @@ impl Scene {
         let smoke = ConstantMedium {
             boundary: translated,
             density: 0.01,
-            phase_function: Isotropic::from(Color::zero()),
+            phase_function: Arc::new(Isotropic::from(Color::zero())),
         };
         self.world.push(Box::new(smoke));
 
@@ -409,16 +406,14 @@ impl Scene {
         let smoke = ConstantMedium {
             boundary: translated,
             density: 0.01,
-            phase_function: Isotropic::from(Color::new(1.0, 1.0, 1.0)),
+            phase_function: Arc::new(Isotropic::from(Color::new(1.0, 1.0, 1.0))),
         };
         self.world.push(Box::new(smoke));
     }
 
     fn create_cornell_box(&mut self) {
         let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
-        let white = Lambertian::from(Color::new(0.73, 0.73, 0.73));
-        let white2 = Lambertian::from(Color::new(0.73, 0.73, 0.73));
-        let white3 = Lambertian::from(Color::new(0.73, 0.73, 0.73));
+        let white: Arc<dyn Material> = Arc::new(Lambertian::from(Color::new(0.73, 0.73, 0.73)));
         let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
         let light = DiffuseLight::from(Color::new(15.0, 15.0, 15.0));
 
@@ -429,7 +424,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 555.0,
-            material: Box::new(green),
+            material: Arc::new(green),
         }));
         self.world.push(Box::new(YzRect {
             y0: 0.0,
@@ -437,7 +432,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 0.0,
-            material: Box::new(red),
+            material: Arc::new(red),
         }));
 
         self.world.push(Box::new(XzRect {
@@ -446,7 +441,7 @@ impl Scene {
             z0: 227.0,
             z1: 332.0,
             k: 554.0,
-            material: Box::new(light),
+            material: Arc::new(light),
         }));
 
         self.world.push(Box::new(XzRect {
@@ -455,7 +450,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 0.0,
-            material: Box::new(white),
+            material: white.clone(),
         }));
         self.world.push(Box::new(XzRect {
             x0: 0.0,
@@ -463,7 +458,7 @@ impl Scene {
             z0: 0.0,
             z1: 555.0,
             k: 555.0,
-            material: Box::new(white2),
+            material: white.clone(),
         }));
 
         self.world.push(Box::new(XyRect {
@@ -472,7 +467,7 @@ impl Scene {
             y0: 0.0,
             y1: 555.0,
             k: 555.0,
-            material: Box::new(white3),
+            material: white.clone(),
         }));
 
         // The inner rectangular boxes
@@ -504,7 +499,7 @@ impl Scene {
         self.world.push(Box::new(Sphere {
             center: Point3::new(0.0, -1000.0, 0.0),
             radius: 1000.0,
-            material: Box::new(material_noise),
+            material: Arc::new(material_noise),
         }));
 
         // sphere
@@ -515,7 +510,7 @@ impl Scene {
         self.world.push(Box::new(Sphere {
             center: Point3::new(0.0, 2.0, 0.0),
             radius: 2.0,
-            material: Box::new(material_noise),
+            material: Arc::new(material_noise),
         }));
 
         // Rectangle light
@@ -527,7 +522,7 @@ impl Scene {
             y0: 1.0,
             y1: 3.0,
             k: -2.0,
-            material: Box::new(difflight),
+            material: Arc::new(difflight),
         }));
     }
 
@@ -540,7 +535,7 @@ impl Scene {
         self.world.push(Box::new(Sphere {
             center: Point3::zero(),
             radius: 2.0,
-            material: Box::new(material),
+            material: Arc::new(material),
         }));
     }
 
@@ -553,7 +548,7 @@ impl Scene {
         self.world.push(Box::new(Sphere {
             center: Point3::new(0.0, -1000.0, 0.0),
             radius: 1000.0,
-            material: Box::new(material_noise),
+            material: Arc::new(material_noise),
         }));
 
         // sphere
@@ -564,29 +559,25 @@ impl Scene {
         self.world.push(Box::new(Sphere {
             center: Point3::new(0.0, 2.0, 0.0),
             radius: 2.0,
-            material: Box::new(material_noise),
+            material: Arc::new(material_noise),
         }));
     }
 
     fn create_two_spheres(&mut self) {
         let checker = CheckerTexture::from((Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
-        let material_ground = Lambertian {
+        let material_ground: Arc<dyn Material> = Arc::new(Lambertian {
             albedo: Box::new(checker),
-        };
+        });
         self.world.push(Box::new(Sphere {
             center: Point3::new(0.0, -10.0, 0.0),
             radius: 10.0,
-            material: Box::new(material_ground),
+            material: material_ground.clone(),
         }));
 
-        let checker = CheckerTexture::from((Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
-        let material_ground = Lambertian {
-            albedo: Box::new(checker),
-        };
         self.world.push(Box::new(Sphere {
             center: Point3::new(0.0, 10.0, 0.0),
             radius: 10.0,
-            material: Box::new(material_ground),
+            material: material_ground.clone(),
         }));
     }
 
@@ -600,7 +591,7 @@ impl Scene {
                 world.push(Box::new(Sphere {
                     center: Point3::new(0.0, -100.5, -1.0),
                     radius: 100.0,
-                    material: Box::new(material_ground),
+                    material: Arc::new(material_ground),
                 }));
             }
             SceneKind::RandomChecker => {
@@ -612,7 +603,7 @@ impl Scene {
                 world.push(Box::new(Sphere {
                     center: Point3::new(0.0, -1000.0, 0.0),
                     radius: 1000.0,
-                    material: Box::new(material_ground),
+                    material: Arc::new(material_ground),
                 }));
             }
             _ => panic!("Invalid kind expect one of the Random ones: {:?}", kind),
@@ -640,7 +631,7 @@ impl Scene {
                             world.push(Box::new(Sphere {
                                 center,
                                 radius: 0.2,
-                                material: Box::new(sphere_material),
+                                material: Arc::new(sphere_material),
                             }));
                         } else {
                             // moving sphere
@@ -652,7 +643,7 @@ impl Scene {
                                 time0: 0.0,
                                 time1: 1.0,
                                 radius: 0.2,
-                                material: Box::new(sphere_material),
+                                material: Arc::new(sphere_material),
                             }));
                         }
                     } else if choose_mat < 0.95 {
@@ -663,7 +654,7 @@ impl Scene {
                         world.push(Box::new(Sphere {
                             center,
                             radius: 0.2,
-                            material: Box::new(sphere_material),
+                            material: Arc::new(sphere_material),
                         }));
                     } else {
                         // glass
@@ -671,7 +662,7 @@ impl Scene {
                         world.push(Box::new(Sphere {
                             center,
                             radius: 0.2,
-                            material: Box::new(sphere_material),
+                            material: Arc::new(sphere_material),
                         }));
                     }
                 }
@@ -683,21 +674,21 @@ impl Scene {
         world.push(Box::new(Sphere {
             center: Point3::new(0.0, 1.0, 0.0),
             radius: 1.0,
-            material: Box::new(material1),
+            material: Arc::new(material1),
         }));
 
         let material2 = Lambertian::from(Color::new(0.4, 0.2, 0.1));
         world.push(Box::new(Sphere {
             center: Point3::new(-4.0, 1.0, 0.0),
             radius: 1.0,
-            material: Box::new(material2),
+            material: Arc::new(material2),
         }));
 
         let material3 = Metal::new(Color::new(0.7, 0.6, 0.5), 0.0);
         world.push(Box::new(Sphere {
             center: Point3::new(4.0, 1.0, 0.0),
             radius: 1.0,
-            material: Box::new(material3),
+            material: Arc::new(material3),
         }));
 
         // Without Bvh

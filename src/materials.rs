@@ -10,7 +10,7 @@ pub struct Scatter {
     pub scattered: Option<Ray>,
 }
 
-pub trait Material: Sync {
+pub trait Material: Send + Sync {
     fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter;
 
     fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
@@ -148,7 +148,7 @@ impl Material for DiffuseLight {
     }
 
     fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
-        self.emit.value(u, v, &p)
+        self.emit.value(u, v, p)
     }
 }
 
