@@ -8,9 +8,13 @@ I learned Rust while writing this code so many things could be improved.
 
 Fully implemented.
 
+![Final render](render/book1.png)
+
 ##  [Ray Tracing: The Next Week](https://raytracing.github.io/books/RayTracingTheNextWeek.html)
 
 Fully implemented.
+
+![Final render](render/book2.png)
 
 ## [Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
 
