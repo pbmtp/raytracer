@@ -16,7 +16,7 @@ use crate::materials::{
     dielectric::Dielectric, diffuse_light::DiffuseLight, isotropic::Isotropic,
     lambertian::Lambertian, metal::Metal, Material,
 };
-use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture};
+use crate::texture::{checker::CheckerTexture, image::ImageTexture, noise::NoiseTexture};
 use crate::tools::{random_double, random_double_range};
 use crate::vec3::{Color, Point3, Vec3};
 

@@ -1,6 +1,6 @@
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::texture::{SolidTexture, Texture};
+use crate::texture::{solid::SolidTexture, Texture};
 use crate::vec3::{Color, Point3};
 
 use super::{Material, Scatter};
