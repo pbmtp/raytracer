@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::geometry::aabb::Aabb;
 use crate::geometry::aarect::{XyRect, XzRect, YzRect};
 use crate::hittable::{HitRecord, Hittable};
-use crate::materials::{Lambertian, Material};
+use crate::materials::{lambertian::Lambertian, Material};
 use crate::ray::Ray;
 use crate::vec3::{Color, Point3};
 

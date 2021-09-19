@@ -12,7 +12,10 @@ use crate::geometry::{
     translate::Translate,
 };
 use crate::hittable::Hittable;
-use crate::materials::{Dielectric, DiffuseLight, Isotropic, Lambertian, Material, Metal};
+use crate::materials::{
+    dielectric::Dielectric, diffuse_light::DiffuseLight, isotropic::Isotropic,
+    lambertian::Lambertian, metal::Metal, Material,
+};
 use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use crate::tools::{random_double, random_double_range};
 use crate::vec3::{Color, Point3, Vec3};
