@@ -10,23 +10,16 @@ use rayon::prelude::*;
 
 use std::time::Instant;
 
-mod aabb;
-mod aarect;
-mod bvh;
+mod geometry;
+
 mod camera;
-mod cube;
 mod hittable;
 mod materials;
-mod medium;
-mod moving_sphere;
 mod perlin;
 mod ray;
-mod rotate;
 mod scene;
-mod sphere;
 mod texture;
 mod tools;
-mod translate;
 mod vec3;
 
 use hittable::Hittable;
@@ -75,7 +68,7 @@ fn render(scene: &Scene, name: &str) {
     bar.set_style(ProgressStyle::default_bar().template(
         "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",
     ));
-    bar.set_draw_delta( bar_len / 100);
+    bar.set_draw_delta(bar_len / 100);
     pixels
         .par_chunks_mut(BYTES_PER_PIXEL)
         .into_par_iter()

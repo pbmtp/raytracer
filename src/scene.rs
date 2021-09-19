@@ -1,18 +1,20 @@
 use std::sync::Arc;
 
-use crate::aarect::{XyRect, XzRect, YzRect};
-use crate::bvh::BvhNode;
 use crate::camera::Camera;
-use crate::cube::Cube;
+use crate::geometry::{
+    aarect::{XyRect, XzRect, YzRect},
+    bvh::BvhNode,
+    cube::Cube,
+    medium::ConstantMedium,
+    moving_sphere::MovingSphere,
+    rotate::RotateY,
+    sphere::Sphere,
+    translate::Translate,
+};
 use crate::hittable::Hittable;
 use crate::materials::{Dielectric, DiffuseLight, Isotropic, Lambertian, Material, Metal};
-use crate::medium::ConstantMedium;
-use crate::moving_sphere::MovingSphere;
-use crate::rotate::RotateY;
-use crate::sphere::Sphere;
 use crate::texture::{CheckerTexture, ImageTexture, NoiseTexture};
 use crate::tools::{random_double, random_double_range};
-use crate::translate::Translate;
 use crate::vec3::{Color, Point3, Vec3};
 
 pub struct Config {
