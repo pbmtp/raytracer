@@ -15,7 +15,6 @@ mod geometry;
 mod camera;
 mod hittable;
 mod materials;
-mod perlin;
 mod ray;
 mod scene;
 mod texture;

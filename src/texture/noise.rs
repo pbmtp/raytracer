@@ -1,9 +1,6 @@
-use crate::{
-    perlin::Perlin,
-    vec3::{Color, Point3},
-};
+use crate::vec3::{Color, Point3};
 
-use super::Texture;
+use super::{perlin::Perlin, Texture};
 
 // NoiseTexture using Perlin as noise source
 pub struct NoiseTexture {
