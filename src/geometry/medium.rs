@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
+use crate::camera::ray::Ray;
 use crate::geometry::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::isotropic::Isotropic;
-use crate::ray::Ray;
 use crate::tools::random_double;
 use crate::vec3::Vec3;
 

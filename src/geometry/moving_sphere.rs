@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
+use crate::camera::ray::Ray;
 use crate::geometry::{aabb::Aabb, sphere::Sphere};
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::Material;
-use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
 pub struct MovingSphere {

@@ -1,6 +1,6 @@
+use crate::camera::ray::Ray;
 use crate::geometry::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
-use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 pub struct Translate<H: Hittable> {

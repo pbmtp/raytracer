@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 // Axis-Aligned Rectangles
+use crate::camera::ray::Ray;
 use crate::geometry::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::Material;
-use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
 // X-Y Axis-Aligned Rectangle

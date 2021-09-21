@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::camera::Camera;
+use crate::camera::camera::Camera;
 use crate::geometry::{
     aarect::{XyRect, XzRect, YzRect},
     bvh::BvhNode,

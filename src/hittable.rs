@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
+use crate::camera::ray::Ray;
 use crate::geometry::aabb::Aabb;
 use crate::materials::Material;
-use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
 #[derive(Clone)]
@@ -74,7 +74,7 @@ impl HitRecord {
     }
 }
 
-pub trait Hittable : Sync {
+pub trait Hittable: Sync {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb>;
 }

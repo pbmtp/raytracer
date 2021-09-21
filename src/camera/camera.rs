@@ -1,6 +1,7 @@
-use crate::ray::Ray;
 use crate::tools::random_double_range;
 use crate::vec3::{Point3, Vec3};
+
+use super::ray::Ray;
 
 #[derive(Debug, Default)]
 pub struct Camera {

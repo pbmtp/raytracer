@@ -1,6 +1,6 @@
 use crate::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
-use crate::ray::Ray;
+use crate::camera::ray::Ray;
 
 #[derive(Debug, Default)]
 pub struct HittableList<T>

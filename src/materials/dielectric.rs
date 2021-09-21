@@ -1,5 +1,5 @@
+use crate::camera::ray::Ray;
 use crate::hittable::HitRecord;
-use crate::ray::Ray;
 use crate::tools::random_double;
 use crate::vec3::{Color, Vec3};
 

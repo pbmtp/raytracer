@@ -1,5 +1,5 @@
 // Axis-Aligned Bounding Boxes
-use crate::ray::Ray;
+use crate::camera::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 use std::ops::Add;
 

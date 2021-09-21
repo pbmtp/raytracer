@@ -15,14 +15,13 @@ mod geometry;
 mod camera;
 mod hittable;
 mod materials;
-mod ray;
 mod scene;
 mod texture;
 mod tools;
 mod vec3;
 
+use camera::ray::Ray;
 use hittable::Hittable;
-use ray::Ray;
 use scene::{Scene, SceneKind};
 use tools::random_double;
 use vec3::Color;

@@ -1,5 +1,5 @@
+use crate::camera::ray::Ray;
 use crate::hittable::HitRecord;
-use crate::ray::Ray;
 use crate::vec3::{Color, Point3};
 
 pub mod dielectric;

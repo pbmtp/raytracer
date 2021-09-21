@@ -1,8 +1,8 @@
 use std::cmp::Ordering;
 
+use crate::camera::ray::Ray;
 use crate::geometry::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
-use crate::ray::Ray;
 use crate::tools::random_usize_range;
 
 pub struct BvhNode {
