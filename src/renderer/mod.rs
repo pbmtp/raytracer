@@ -5,6 +5,7 @@ use crate::hittable::Hittable;
 use crate::scene::Scene;
 use crate::vec3::Color;
 
+pub mod parallel_crossbeam;
 pub mod parallel_rayon;
 pub mod sequential;
 
@@ -13,6 +14,7 @@ pub mod sequential;
 pub(crate) const BYTES_PER_PIXEL: usize = 3;
 
 pub enum RendererKind {
+    ParallelCrossbeam,
     ParallelRayon,
     Sequential,
 }
@@ -55,6 +57,7 @@ pub fn render(scene: &Scene, renderer: RendererKind, name: &str) {
     bar.set_draw_delta(bar_len / 100);
 
     match renderer {
+        RendererKind::ParallelCrossbeam => parallel_crossbeam::render(scene, &bar, &mut pixels),
         RendererKind::ParallelRayon => parallel_rayon::render(scene, &bar, &mut pixels),
         RendererKind::Sequential => sequential::render(scene, &bar, &mut pixels),
     }

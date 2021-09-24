@@ -25,7 +25,7 @@ fn main() {
     let scene = Scene::new(false, SceneKind::CornellBox, "data/1k/earth.jpg");
 
     let start = Instant::now();
-    render(&scene, RendererKind::ParallelRayon, "out-test.png");
+    render(&scene, RendererKind::ParallelCrossbeam, "out-test.png");
     println!(
         "Time elapsed rendering  scene is: {}",
         HumanDuration(start.elapsed())
