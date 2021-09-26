@@ -12,6 +12,7 @@ mod camera;
 mod geometry;
 mod hittable;
 mod materials;
+mod onb;
 mod renderer;
 mod scene;
 mod texture;

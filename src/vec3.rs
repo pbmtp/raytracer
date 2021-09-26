@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use std::f64::consts::PI;
 use std::iter::Sum;
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
@@ -100,6 +101,19 @@ impl Vec3 {
 
             return p;
         }
+    }
+
+    #[inline]
+    pub fn random_cosine_direction() -> Vec3 {
+        let r1 = random_double();
+        let r2 = random_double();
+        let z = (1.0 - r2).sqrt();
+
+        let phi = 2.0 * PI * r1;
+        let x = phi.cos() * r2.sqrt();
+        let y = phi.sin() * r2.sqrt();
+
+        Vec3::from((x, y, z))
     }
 
     // getters
@@ -214,13 +228,11 @@ impl Vec3 {
     // TODO normalize
 }
 
-/*
 impl From<(f64, f64, f64)> for Vec3 {
-    fn from(tuple: (f64, f64, f64)) -> Self {
-        Self::new(tuple.0, tuple.1, tuple.2)
+    fn from(xyz: (f64, f64, f64)) -> Self {
+        Self::new(xyz.0, xyz.1, xyz.2)
     }
 }
-*/
 
 impl Add for Vec3 {
     type Output = Self;
