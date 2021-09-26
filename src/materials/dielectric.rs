@@ -47,6 +47,7 @@ impl Material for Dielectric {
         Scatter {
             attenuation,
             scattered: Some(Ray::new(hr.get_p(), direction, ray.time())),
+            pdf: 1.0,
         }
     }
 }

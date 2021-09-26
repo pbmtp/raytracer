@@ -22,6 +22,7 @@ impl Material for DiffuseLight {
         Scatter {
             attenuation: Color::zero(),
             scattered: None,
+            pdf: 1.0,
         }
     }
 

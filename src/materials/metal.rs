@@ -32,6 +32,7 @@ impl Material for Metal {
             } else {
                 None
             },
+            pdf: 1.0,
         }
     }
 }

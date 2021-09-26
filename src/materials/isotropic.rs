@@ -26,6 +26,7 @@ impl Material for Isotropic {
                 Vec3::random_in_unit_sphere(),
                 ray.time(),
             )),
+            pdf: 1.0,
         }
     }
 }

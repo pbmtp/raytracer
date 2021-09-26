@@ -31,7 +31,9 @@ pub(crate) fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, dep
         let scatter = hr.material.scatter(r, &hr);
         if let Some(bounce) = scatter.scattered {
             return emitted
-                + scatter.attenuation * ray_color(&bounce, background, world, depth - 1);
+                + scatter.attenuation
+                    * hr.material.scattering_pdf(r, &hr, &bounce)
+                    * ray_color(&bounce, background, world, depth - 1) / scatter.pdf;
         }
 
         return emitted;

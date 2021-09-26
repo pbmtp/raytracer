@@ -55,9 +55,9 @@ impl Config {
         match kind {
             SceneKind::CornellBox | SceneKind::CornellBoxSmoke => {
                 let ratio: f64 = 1.0;
-                let width: usize = 600;
+                let width: usize = 600; // def: 600
                 let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 200;
+                let samples_per_pixel: u32 = 200; // def: 200
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = if moving { 1.0 } else { 0.0 };

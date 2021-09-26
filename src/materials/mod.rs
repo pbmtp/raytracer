@@ -12,10 +12,21 @@ pub mod metal;
 pub struct Scatter {
     pub attenuation: Color,
     pub scattered: Option<Ray>,
+    pub pdf: f64,
 }
 
 pub trait Material: Send + Sync {
-    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter;
+    fn scatter(&self, _ray: &Ray, _hr: &HitRecord) -> Scatter {
+        Scatter {
+            attenuation: Color::zero(),
+            scattered: None,
+            pdf: 1.0,
+        }
+    }
+
+    fn scattering_pdf(&self, _ray: &Ray, _hr: &HitRecord, _scattered: &Ray) -> f64 {
+        1.0
+    }
 
     fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
         Color::zero()
