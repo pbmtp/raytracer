@@ -3,7 +3,8 @@ use indicatif::{ProgressBar, ProgressStyle};
 use crate::camera::ray::Ray;
 use crate::hittable::Hittable;
 use crate::scene::Scene;
-use crate::vec3::Color;
+use crate::tools::random_double_range;
+use crate::vec3::{Color, Point3};
 
 pub mod parallel_crossbeam;
 pub mod parallel_rayon;
@@ -30,10 +31,39 @@ pub(crate) fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, dep
 
         let scatter = hr.material.scatter(r, &hr);
         if let Some(bounce) = scatter.scattered {
+            // 6.1 Original
+            // return emitted
+            //     + scatter.attenuation
+            //         * hr.material.scattering_pdf(r, &hr, &bounce)
+            //         * ray_color(&bounce, background, world, depth - 1) / scatter.pdf;
+
+            // 9.2 Light Sampling (Hack)
+            let on_light = Point3::new(
+                random_double_range(213.0, 343.0),
+                554.0,
+                random_double_range(227.0, 332.0),
+            );
+            let to_light = on_light - hr.get_p();
+            let distance_squared = to_light.length_squared();
+            let to_light = to_light.to_unit_vector();
+
+            if to_light.dot(hr.get_normal()) < 0.0 {
+                return emitted;
+            }
+
+            let light_area = (343.0 - 213.0) * (332.0 - 227.0);
+            let light_cosine = to_light.y().abs();
+            if light_cosine < 0.000001 {
+                return emitted;
+            }
+
+            let pdf = distance_squared / (light_cosine * light_area);
+            let scattered = Ray::new(hr.get_p(), to_light, r.time());
             return emitted
                 + scatter.attenuation
-                    * hr.material.scattering_pdf(r, &hr, &bounce)
-                    * ray_color(&bounce, background, world, depth - 1) / scatter.pdf;
+                    * hr.material.scattering_pdf(r, &hr, &scattered)
+                    * ray_color(&scattered, background, world, depth - 1)
+                    / pdf;
         }
 
         return emitted;
