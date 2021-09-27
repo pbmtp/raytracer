@@ -72,6 +72,15 @@ impl HitRecord {
     pub fn translate(&mut self, offset: Vec3) {
         self.p += offset;
     }
+
+    pub fn flip_normal(&self) -> HitRecord {
+        HitRecord {
+            normal: -self.normal,
+            front_face: !self.front_face,
+            material: self.material.clone(),
+            ..*self
+        }
+    }
 }
 
 pub trait Hittable: Sync {

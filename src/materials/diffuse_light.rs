@@ -26,7 +26,11 @@ impl Material for DiffuseLight {
         }
     }
 
-    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
-        self.emit.value(u, v, p)
+    fn emitted(&self, _ray: &Ray, hr: &HitRecord, u: f64, v: f64, p: &Point3) -> Color {
+        if hr.is_front() {
+            self.emit.value(u, v, p)
+        } else {
+            Color::zero()
+        }
     }
 }

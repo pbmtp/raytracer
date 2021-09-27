@@ -27,7 +27,9 @@ pub(crate) fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, dep
     }
 
     if let Some(hr) = world.hit(r, 0.001, std::f64::INFINITY) {
-        let emitted = hr.material.emitted(hr.get_u(), hr.get_v(), &hr.get_p());
+        let emitted = hr
+            .material
+            .emitted(r, &hr, hr.get_u(), hr.get_v(), &hr.get_p());
 
         let scatter = hr.material.scatter(r, &hr);
         if let Some(bounce) = scatter.scattered {

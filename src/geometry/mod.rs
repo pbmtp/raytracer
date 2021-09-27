@@ -2,6 +2,7 @@ pub mod aabb;
 pub mod aarect;
 pub mod bvh;
 pub mod cube;
+pub mod flip_normals;
 pub mod medium;
 pub mod moving_sphere;
 pub mod rotate;

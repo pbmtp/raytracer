@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use crate::camera::camera::Camera;
+use crate::geometry::flip_normals::FlipNormals;
 use crate::geometry::{
     aarect::{XyRect, XzRect, YzRect},
     bvh::BvhNode,
@@ -351,14 +352,14 @@ impl Scene {
             material: Arc::new(red),
         }));
 
-        self.world.push(Box::new(XzRect {
+        self.world.push(Box::new(FlipNormals::new(XzRect {
             x0: 113.0,
             x1: 443.0,
             z0: 127.0,
             z1: 432.0,
             k: 554.0,
             material: Arc::new(light),
-        }));
+        })));
 
         self.world.push(Box::new(XzRect {
             x0: 0.0,
@@ -440,14 +441,14 @@ impl Scene {
             material: Arc::new(red),
         }));
 
-        self.world.push(Box::new(XzRect {
+        self.world.push(Box::new(FlipNormals::new(XzRect {
             x0: 213.0,
             x1: 343.0,
             z0: 227.0,
             z1: 332.0,
             k: 554.0,
             material: Arc::new(light),
-        }));
+        })));
 
         self.world.push(Box::new(XzRect {
             x0: 0.0,
