@@ -2,9 +2,13 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::camera::ray::Ray;
 use crate::hittable::Hittable;
+use crate::pdf::cosine::CosinePdf;
+use crate::pdf::hittable::HittablePdf;
+use crate::pdf::mixture::MixturePdf;
+use crate::pdf::Pdf;
 use crate::scene::Scene;
-use crate::tools::random_double_range;
-use crate::vec3::{Color, Point3};
+// use crate::tools::random_double_range;
+use crate::vec3::Color;
 
 pub mod parallel_crossbeam;
 pub mod parallel_rayon;
@@ -20,7 +24,13 @@ pub enum RendererKind {
     Sequential,
 }
 
-pub(crate) fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, depth: u32) -> Color {
+pub(crate) fn ray_color(
+    r: &Ray,
+    background: &Color,
+    world: &Vec<Box<dyn Hittable>>,
+    light: &Vec<Box<dyn Hittable>>,
+    depth: u32,
+) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if depth == 0 {
         return Color::zero();
@@ -32,18 +42,21 @@ pub(crate) fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, dep
             .emitted(r, &hr, hr.get_u(), hr.get_v(), &hr.get_p());
 
         let scatter = hr.material.scatter(r, &hr);
-        if let Some(bounce) = scatter.scattered {
+        if let Some(_scattered) = scatter.scattered {
+            /*
             // 6.1 Original
-            // return emitted
-            //     + scatter.attenuation
-            //         * hr.material.scattering_pdf(r, &hr, &bounce)
-            //         * ray_color(&bounce, background, world, depth - 1) / scatter.pdf;
+            return emitted
+                + scatter.attenuation
+                   * hr.material.scattering_pdf(r, &hr, &bounce)
+                   * ray_color(&scattered, background, world, depth - 1) / scatter.pdf;
+            */
 
+            /*
             // 9.2 Light Sampling (Hack)
-            let on_light = Point3::new(
-                random_double_range(213.0, 343.0),
+            let on_light = crate::vec3::Point3::new(
+                crate::tools::random_double_range(213.0, 343.0),
                 554.0,
-                random_double_range(227.0, 332.0),
+                crate::tools::random_double_range(227.0, 332.0),
             );
             let to_light = on_light - hr.get_p();
             let distance_squared = to_light.length_squared();
@@ -64,8 +77,50 @@ pub(crate) fn ray_color<T: Hittable>(r: &Ray, background: &Color, world: &T, dep
             return emitted
                 + scatter.attenuation
                     * hr.material.scattering_pdf(r, &hr, &scattered)
-                    * ray_color(&scattered, background, world, depth - 1)
+                    * ray_color(&scattered, background, world, light, depth - 1)
                     / pdf;
+            */
+
+            /*
+            // 10.1 An Average of Lighting and Reflection
+            let p = CosinePdf::new(&hr.get_normal());
+            let scattered = Ray::new(hr.get_p(), p.generate(), r.time());
+            let pdf_val = p.value(&scattered.direction());
+
+            return emitted
+                + scatter.attenuation
+                    * hr.material.scattering_pdf(r, &hr, &scattered)
+                    * ray_color(&scattered, background, world, light, depth - 1)
+                    / pdf_val;
+            */
+
+            /*
+            // 10.2 Sampling Directions towards a Hittable
+            let light_pdf = HittablePdf::new(light, hr.get_p());
+            let scattered = Ray::new(hr.get_p(), light_pdf.generate(), r.time());
+            let pdf_val = light_pdf.value(&scattered.direction());
+
+            return emitted
+                + scatter.attenuation
+                    * hr.material.scattering_pdf(r, &hr, &scattered)
+                    * ray_color(&scattered, background, world, light, depth - 1)
+                    / pdf_val;
+            */
+
+            // 10.3 Mixture Pdf
+            let p0 = HittablePdf::new(light, hr.get_p());
+            let p1 = CosinePdf::new(&hr.get_normal());
+
+            let mixed_pdf = MixturePdf::new(p0, p1);
+
+            let scattered = Ray::new(hr.get_p(), mixed_pdf.generate(), r.time());
+            let pdf_val = mixed_pdf.value(&scattered.direction());
+
+            return emitted
+                + scatter.attenuation
+                    * hr.material.scattering_pdf(r, &hr, &scattered)
+                    * ray_color(&scattered, background, world, light, depth - 1)
+                    / pdf_val;
         }
 
         return emitted;
@@ -91,9 +146,9 @@ pub fn render(scene: &Scene, renderer: RendererKind, name: &str) {
     bar.set_draw_delta(bar_len / 100);
 
     match renderer {
-        RendererKind::ParallelCrossbeam => parallel_crossbeam::render(scene, &bar, &mut pixels),
-        RendererKind::ParallelRayon => parallel_rayon::render(scene, &bar, &mut pixels),
-        RendererKind::Sequential => sequential::render(scene, &bar, &mut pixels),
+        RendererKind::ParallelCrossbeam => parallel_crossbeam::render(&scene, &bar, &mut pixels),
+        RendererKind::ParallelRayon => parallel_rayon::render(&scene, &bar, &mut pixels),
+        RendererKind::Sequential => sequential::render(&scene, &bar, &mut pixels),
     }
 
     bar.finish();

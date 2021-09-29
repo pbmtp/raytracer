@@ -1,6 +1,7 @@
 use crate::camera::ray::Ray;
 use crate::hittable::HitRecord;
 use crate::hittable::Hittable;
+use crate::vec3::{Point3, Vec3};
 
 use super::aabb::Aabb;
 
@@ -25,5 +26,13 @@ impl<H: Hittable> Hittable for FlipNormals<H> {
 
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {
         self.hittable.bounding_box(time0, time1)
+    }
+
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
+        self.hittable.pdf_value(origin, v)
+    }
+
+    fn random(&self, origin: &Point3) -> Vec3 {
+        self.hittable.random(origin)
     }
 }

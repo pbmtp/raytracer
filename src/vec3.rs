@@ -103,6 +103,7 @@ impl Vec3 {
         }
     }
 
+    // pdf
     #[inline]
     pub fn random_cosine_direction() -> Vec3 {
         let r1 = random_double();

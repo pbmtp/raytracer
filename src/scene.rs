@@ -47,6 +47,7 @@ pub enum SceneKind {
 pub struct Scene {
     pub cfg: Config,
     pub world: Vec<Box<dyn Hittable>>,
+    pub light: Vec<Box<dyn Hittable>>,
     pub camera: Camera,
     pub background: Color,
 }
@@ -58,7 +59,7 @@ impl Config {
                 let ratio: f64 = 1.0;
                 let width: usize = 600; // def: 600
                 let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 10; // def: 200
+                let samples_per_pixel: u32 = 100; // def: 200
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = if moving { 1.0 } else { 0.0 };
@@ -169,6 +170,7 @@ impl Scene {
         let mut scene = Scene {
             cfg,
             world: Vec::new(),
+            light: Vec::new(),
             camera,
             background,
         };
@@ -218,7 +220,7 @@ impl Scene {
             self.cfg.time1,
         )));
 
-        // light
+        // FIXME light
         let light = DiffuseLight::from(Color::new(7.0, 7.0, 7.0));
         self.world.push(Box::new(XzRect {
             x0: 123.0,
@@ -332,7 +334,7 @@ impl Scene {
         let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
         let white: Arc<dyn Material> = Arc::new(Lambertian::from(Color::new(0.73, 0.73, 0.73)));
         let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
-        let light = DiffuseLight::from(Color::new(7.0, 7.0, 7.0));
+        let light: Arc<dyn Material> = Arc::new(DiffuseLight::from(Color::new(15.0, 15.0, 15.0)));
 
         // The Box itself
         self.world.push(Box::new(YzRect {
@@ -353,13 +355,22 @@ impl Scene {
         }));
 
         self.world.push(Box::new(FlipNormals::new(XzRect {
-            x0: 113.0,
-            x1: 443.0,
-            z0: 127.0,
-            z1: 432.0,
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
             k: 554.0,
-            material: Arc::new(light),
+            material: light.clone(),
         })));
+
+        self.light.push(Box::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        }));
 
         self.world.push(Box::new(XzRect {
             x0: 0.0,
@@ -421,7 +432,7 @@ impl Scene {
         let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
         let white: Arc<dyn Material> = Arc::new(Lambertian::from(Color::new(0.73, 0.73, 0.73)));
         let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
-        let light = DiffuseLight::from(Color::new(15.0, 15.0, 15.0));
+        let light: Arc<dyn Material> = Arc::new(DiffuseLight::from(Color::new(15.0, 15.0, 15.0)));
 
         // The Box itself
         self.world.push(Box::new(YzRect {
@@ -447,8 +458,17 @@ impl Scene {
             z0: 227.0,
             z1: 332.0,
             k: 554.0,
-            material: Arc::new(light),
+            material: light.clone(),
         })));
+
+        self.light.push(Box::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        }));
 
         self.world.push(Box::new(XzRect {
             x0: 0.0,

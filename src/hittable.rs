@@ -1,3 +1,4 @@
+use rand::seq::SliceRandom;
 use std::sync::Arc;
 
 use crate::camera::ray::Ray;
@@ -75,7 +76,6 @@ impl HitRecord {
 
     pub fn flip_normal(&self) -> HitRecord {
         HitRecord {
-            normal: -self.normal,
             front_face: !self.front_face,
             material: self.material.clone(),
             ..*self
@@ -86,6 +86,14 @@ impl HitRecord {
 pub trait Hittable: Sync {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb>;
+
+    fn pdf_value(&self, _origin: &Point3, _v: &Vec3) -> f64 {
+        0.0
+    }
+
+    fn random(&self, _origin: &Point3) -> Vec3 {
+        Vec3::new(1.0, 0.0, 0.0)
+    }
 }
 
 impl Hittable for Vec<Box<dyn Hittable>> {
@@ -122,5 +130,39 @@ impl Hittable for Vec<Box<dyn Hittable>> {
         }
 
         result
+    }
+
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
+        let weight = 1.0 / self.len() as f64;
+        let mut sum = 0.0;
+
+        for obj in self.iter() {
+            sum += weight * obj.pdf_value(origin, v)
+        }
+
+        sum
+    }
+
+    fn random(&self, origin: &Point3) -> Vec3 {
+        self.choose(&mut rand::thread_rng())
+            .map_or(Vec3::new(1.0, 0.0, 0.0), |obj| obj.random(origin))
+    }
+}
+
+impl Hittable for &Vec<Box<dyn Hittable>> {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
+        (*self).hit(r, tmin, tmax)
+    }
+
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {
+        (*self).bounding_box(time0, time1)
+    }
+
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
+        (*self).pdf_value(origin, v)
+    }
+
+    fn random(&self, origin: &Point3) -> Vec3 {
+        (*self).random(origin)
     }
 }

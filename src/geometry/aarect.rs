@@ -5,6 +5,7 @@ use crate::camera::ray::Ray;
 use crate::geometry::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::Material;
+use crate::tools::random_double_range;
 use crate::vec3::{Point3, Vec3};
 
 // X-Y Axis-Aligned Rectangle
@@ -50,6 +51,30 @@ impl Hittable for XyRect {
             Point3::new(self.x0, self.y0, self.k - 0.0001),
             Point3::new(self.x1, self.y1, self.k + 0.0001),
         ))
+    }
+
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
+        let ray = Ray::new(*origin, *v, 0.0);
+        if let Some(hr) = self.hit(&ray, 0.001, std::f64::INFINITY) {
+            let area = (self.x1 - self.x0) * (self.y1 - self.y0);
+
+            let distance_squared = hr.get_t() * hr.get_t() * v.length_squared();
+            let cosine = (v.dot(hr.get_normal()) / v.length()).abs();
+
+            return distance_squared / (cosine * area);
+        }
+
+        0.0
+    }
+
+    fn random(&self, origin: &Point3) -> Vec3 {
+        let random_point = Point3::new(
+            random_double_range(self.x0, self.x1),
+            random_double_range(self.y0, self.y1),
+            self.k,
+        );
+
+        random_point - *origin
     }
 }
 
@@ -97,6 +122,30 @@ impl Hittable for XzRect {
             Point3::new(self.x1, self.k + 0.0001, self.z1),
         ))
     }
+
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
+        let ray = Ray::new(*origin, *v, 0.0);
+        if let Some(hr) = self.hit(&ray, 0.001, std::f64::INFINITY) {
+            let area = (self.x1 - self.x0) * (self.z1 - self.z0);
+
+            let distance_squared = hr.get_t() * hr.get_t() * v.length_squared();
+            let cosine = (v.dot(hr.get_normal()) / v.length()).abs();
+
+            return distance_squared / (cosine * area);
+        }
+
+        0.0
+    }
+
+    fn random(&self, origin: &Point3) -> Vec3 {
+        let random_point = Point3::new(
+            random_double_range(self.x0, self.x1),
+            self.k,
+            random_double_range(self.z0, self.z1),
+        );
+
+        random_point - *origin
+    }
 }
 
 // Y-Z Axis-Aligned Rectangle
@@ -142,5 +191,29 @@ impl Hittable for YzRect {
             Point3::new(self.k - 0.0001, self.y0, self.z0),
             Point3::new(self.k + 0.0001, self.y0, self.z1),
         ))
+    }
+
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
+        let ray = Ray::new(*origin, *v, 0.0);
+        if let Some(hr) = self.hit(&ray, 0.001, std::f64::INFINITY) {
+            let area = (self.y1 - self.y0) * (self.z1 - self.z0);
+
+            let distance_squared = hr.get_t() * hr.get_t() * v.length_squared();
+            let cosine = (v.dot(hr.get_normal()) / v.length()).abs();
+
+            return distance_squared / (cosine * area);
+        }
+
+        0.0
+    }
+
+    fn random(&self, origin: &Point3) -> Vec3 {
+        let random_point = Point3::new(
+            self.k,
+            random_double_range(self.y0, self.y1),
+            random_double_range(self.z0, self.z1),
+        );
+
+        random_point - *origin
     }
 }

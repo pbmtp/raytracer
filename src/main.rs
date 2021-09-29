@@ -2,7 +2,7 @@
 
 // https://raytracing.github.io/books/RayTracingInOneWeekend.html
 // https://raytracing.github.io/books/RayTracingTheNextWeek.html
-// TODO https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
+// IN PROGRESS https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
 
 use indicatif::HumanDuration;
 
@@ -13,6 +13,7 @@ mod geometry;
 mod hittable;
 mod materials;
 mod onb;
+mod pdf;
 mod renderer;
 mod scene;
 mod texture;
