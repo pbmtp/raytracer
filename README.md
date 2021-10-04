@@ -18,11 +18,17 @@ Fully implemented.
 
 ## [Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
 
-To be started.
+In progress.
+
+![Cornell box with importance sampling](render/book3.png)
 
 ## Rust specificities
 
 - Use dynamic traits for Texture and Materials.
 - Multi-threaded using [rayon](https://docs.rs/rayon/1.5.1/rayon/).
 
+## Todo list
 
+- do real time render using pixels / minifb
+- incremental rendering
+- update to soo to be released version 4.0.0 of books
