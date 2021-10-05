@@ -2,11 +2,11 @@ use std::f64::consts::PI;
 
 use crate::camera::ray::Ray;
 use crate::hittable::HitRecord;
-use crate::onb::OrthoNormalBasis;
+use crate::pdf::cosine::CosinePdf;
 use crate::texture::{solid::SolidTexture, Texture};
-use crate::vec3::{Color, Vec3};
+use crate::vec3::Color;
 
-use super::{Material, Scatter};
+use super::{Material, ScatterRecord};
 
 pub struct Lambertian {
     pub albedo: Box<dyn Texture>,
@@ -21,39 +21,11 @@ impl From<Color> for Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
-        /*
-        // Importance Sampling Materials
-        let mut scatter_direction = hr.get_normal() + Vec3::random_unit_vector();
-
-        if scatter_direction.near_zero() {
-            scatter_direction = hr.get_normal();
-        }
-
-        let attenuation = self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p());
-        let scattered = Ray::new(hr.get_p(), scatter_direction.to_unit_vector(), ray.time());
-        let pdf = hr.get_normal().dot(scattered.direction()) / PI;
-
-        Scatter {
-            attenuation,
-            scattered: Some(scattered),
-            pdf,
-        }
-        */
-
-        // Orthonormal Basis
-        let uvw = OrthoNormalBasis::from(hr.get_normal());
-        let scatter_direction = uvw.local(&Vec3::random_cosine_direction());
-
-        let attenuation = self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p());
-        let scattered = Ray::new(hr.get_p(), scatter_direction.to_unit_vector(), ray.time());
-        let pdf = uvw.w().dot(scattered.direction()) / PI;
-
-        Scatter {
-            attenuation,
-            scattered: Some(scattered),
-            pdf,
-        }
+    fn scatter(&self, _ray: &Ray, hr: &HitRecord) -> Option<ScatterRecord> {
+        Some(ScatterRecord::diffuse(
+            &self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p()),
+            Box::new(CosinePdf::new(&hr.get_normal())),
+        ))
     }
 
     fn scattering_pdf(&self, _ray: &Ray, hr: &HitRecord, scattered: &Ray) -> f64 {

@@ -1,9 +1,7 @@
-use crate::camera::ray::Ray;
-use crate::hittable::HitRecord;
 use crate::texture::{solid::SolidTexture, Texture};
-use crate::vec3::{Color, Vec3};
+use crate::vec3::Color;
 
-use super::{Material, Scatter};
+use super::Material;
 
 pub struct Isotropic {
     albedo: Box<dyn Texture>,
@@ -18,6 +16,8 @@ impl From<Color> for Isotropic {
 }
 
 impl Material for Isotropic {
+    /* FIXME see dev_major branch */
+    /*
     fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
         Scatter {
             attenuation: self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p()),
@@ -29,4 +29,5 @@ impl Material for Isotropic {
             pdf: 1.0,
         }
     }
+    */
 }

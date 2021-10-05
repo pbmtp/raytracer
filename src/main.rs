@@ -24,7 +24,7 @@ use renderer::{render, RendererKind};
 use scene::{Scene, SceneKind};
 
 fn main() {
-    let scene = Scene::new(false, SceneKind::CornellBox, "data/1k/earth.jpg");
+    let scene = Scene::new(false, SceneKind::CornellBoxGlassSphere, "data/1k/earth.jpg");
 
     let start = Instant::now();
     render(&scene, RendererKind::ParallelCrossbeam, "out-test.png");

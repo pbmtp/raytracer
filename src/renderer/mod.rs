@@ -2,7 +2,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::camera::ray::Ray;
 use crate::hittable::Hittable;
-use crate::pdf::cosine::CosinePdf;
+use crate::materials::ScatterRecord;
 use crate::pdf::hittable::HittablePdf;
 use crate::pdf::mixture::MixturePdf;
 use crate::pdf::Pdf;
@@ -42,85 +42,25 @@ pub(crate) fn ray_color(
             .emitted(r, &hr, hr.get_u(), hr.get_v(), &hr.get_p());
 
         let scatter = hr.material.scatter(r, &hr);
-        if let Some(_scattered) = scatter.scattered {
-            /*
-            // 6.1 Original
-            return emitted
-                + scatter.attenuation
-                   * hr.material.scattering_pdf(r, &hr, &bounce)
-                   * ray_color(&scattered, background, world, depth - 1) / scatter.pdf;
-            */
+        if let Some(srec) = scatter {
+            match srec {
+                ScatterRecord::Specular { attenuation, ray } => {
+                    return attenuation * ray_color(&ray, background, world, light, depth - 1);
+                },
+                ScatterRecord::Diffuse { attenuation, pdf } => {
+                    let light_pdf = HittablePdf::new(light, hr.get_p());
+                    let mixed_pdf = MixturePdf::new(light_pdf, pdf);
 
-            /*
-            // 9.2 Light Sampling (Hack)
-            let on_light = crate::vec3::Point3::new(
-                crate::tools::random_double_range(213.0, 343.0),
-                554.0,
-                crate::tools::random_double_range(227.0, 332.0),
-            );
-            let to_light = on_light - hr.get_p();
-            let distance_squared = to_light.length_squared();
-            let to_light = to_light.to_unit_vector();
+                    let scattered = Ray::new(hr.get_p(), mixed_pdf.generate(), r.time());
+                    let pdf_val = mixed_pdf.value(&scattered.direction());
 
-            if to_light.dot(hr.get_normal()) < 0.0 {
-                return emitted;
+                    return emitted
+                        + attenuation
+                            * hr.material.scattering_pdf(r, &hr, &scattered)
+                            * ray_color(&scattered, background, world, light, depth - 1)
+                            / pdf_val;
+                }
             }
-
-            let light_area = (343.0 - 213.0) * (332.0 - 227.0);
-            let light_cosine = to_light.y().abs();
-            if light_cosine < 0.000001 {
-                return emitted;
-            }
-
-            let pdf = distance_squared / (light_cosine * light_area);
-            let scattered = Ray::new(hr.get_p(), to_light, r.time());
-            return emitted
-                + scatter.attenuation
-                    * hr.material.scattering_pdf(r, &hr, &scattered)
-                    * ray_color(&scattered, background, world, light, depth - 1)
-                    / pdf;
-            */
-
-            /*
-            // 10.1 An Average of Lighting and Reflection
-            let p = CosinePdf::new(&hr.get_normal());
-            let scattered = Ray::new(hr.get_p(), p.generate(), r.time());
-            let pdf_val = p.value(&scattered.direction());
-
-            return emitted
-                + scatter.attenuation
-                    * hr.material.scattering_pdf(r, &hr, &scattered)
-                    * ray_color(&scattered, background, world, light, depth - 1)
-                    / pdf_val;
-            */
-
-            /*
-            // 10.2 Sampling Directions towards a Hittable
-            let light_pdf = HittablePdf::new(light, hr.get_p());
-            let scattered = Ray::new(hr.get_p(), light_pdf.generate(), r.time());
-            let pdf_val = light_pdf.value(&scattered.direction());
-
-            return emitted
-                + scatter.attenuation
-                    * hr.material.scattering_pdf(r, &hr, &scattered)
-                    * ray_color(&scattered, background, world, light, depth - 1)
-                    / pdf_val;
-            */
-
-            // 10.3 Mixture Pdf
-            let p0 = HittablePdf::new(light, hr.get_p());
-            let p1 = CosinePdf::new(&hr.get_normal());
-
-            let mixed_pdf = MixturePdf::new(p0, p1);
-
-            let scattered = Ray::new(hr.get_p(), mixed_pdf.generate(), r.time());
-            let pdf_val = mixed_pdf.value(&scattered.direction());
-
-            return emitted
-                + scatter.attenuation
-                    * hr.material.scattering_pdf(r, &hr, &scattered)
-                    * ray_color(&scattered, background, world, light, depth - 1)
-                    / pdf_val;
         }
 
         return emitted;

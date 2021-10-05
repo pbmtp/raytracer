@@ -3,7 +3,7 @@ use crate::hittable::HitRecord;
 use crate::tools::random_double;
 use crate::vec3::{Color, Vec3};
 
-use super::{Material, Scatter};
+use super::{Material, ScatterRecord};
 
 pub struct Dielectric {
     ref_idx: f64,
@@ -23,7 +23,7 @@ fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
+    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Option<ScatterRecord> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let refraction_ratio = if hr.is_front() {
             1.0 / self.ref_idx
@@ -44,10 +44,8 @@ impl Material for Dielectric {
                 Vec3::refract(&unit_direction, &hr.get_normal(), refraction_ratio)
             };
 
-        Scatter {
-            attenuation,
-            scattered: Some(Ray::new(hr.get_p(), direction, ray.time())),
-            pdf: 1.0,
-        }
+        let specular_ray = Ray::new(hr.get_p(), direction, ray.time());
+
+        Some(ScatterRecord::specular(&attenuation, &specular_ray))
     }
 }

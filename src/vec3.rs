@@ -103,6 +103,19 @@ impl Vec3 {
         }
     }
 
+    #[inline]
+    pub fn random_to_sphere(radius: f64, distance_squared: f64) -> Vec3 {
+        let r1 = random_double();
+        let r2 = random_double();
+        let z = 1.0 + r2 * ((1.0 - radius.powi(2) / distance_squared).sqrt() - 1.0);
+
+        let phi = 2.0 * PI * r1;
+        let x = phi.cos() * (1.0 - z.powi(2)).sqrt();
+        let y = phi.sin() * (1.0 - z.powi(2)).sqrt();
+
+        Vec3::new(x, y, z)
+    }
+
     // pdf
     #[inline]
     pub fn random_cosine_direction() -> Vec3 {
@@ -193,13 +206,21 @@ impl Vec3 {
 
     pub fn to_u8_avg_gamma2(self, samples_per_pixel: u32) -> [u8; 3] {
         let mut c = self;
-        c /= samples_per_pixel as f64;
 
-        let r = c.e[0].sqrt().clamp(0.0, 0.999) * 256f64;
-        let g = c.e[1].sqrt().clamp(0.0, 0.999) * 256f64;
-        let b = c.e[2].sqrt().clamp(0.0, 0.999) * 256f64;
+        for idx in 0..3 {
+            // Replace NaN components with zero. See explanation in Ray Tracing: The Rest of Your Life.
+            if c.e[idx].is_nan() {
+                c.e[idx] = 0.0;
+            } else {
+                // Divide the color by the number of samples.
+                c.e[idx] /= samples_per_pixel as f64;
 
-        [r as u8, g as u8, b as u8]
+                // Gamma-correct for gamma=2.0.
+                c.e[idx] = c.e[idx].sqrt().clamp(0.0, 0.999) * 256f64;
+            }
+        }
+
+        [c.e[0] as u8, c.e[1] as u8, c.e[2] as u8]
     }
 
     pub fn to_unit_vector(self) -> Vec3 {

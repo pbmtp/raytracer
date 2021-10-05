@@ -5,6 +5,7 @@ use crate::camera::ray::Ray;
 use crate::geometry::aabb::Aabb;
 use crate::hittable::{HitRecord, Hittable};
 use crate::materials::Material;
+use crate::onb::OrthoNormalBasis;
 use crate::vec3::{Point3, Vec3};
 
 pub struct Sphere {
@@ -72,5 +73,26 @@ impl Hittable for Sphere {
             self.center - Vec3::new(r, r, r),
             self.center + Vec3::new(r, r, r),
         ))
+    }
+
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
+        let ray = Ray::new(*origin, *v, 0.0);
+        if let Some(_hr) = self.hit(&ray, 0.001, std::f64::INFINITY) {
+            let cos_theta_max = (1.0 - self.radius.powi(2) / (self.center - *origin).length_squared()).sqrt();
+            let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
+
+            return 1.0 / solid_angle;
+        }
+
+        0.0
+    }
+
+    fn random(&self, origin: &Point3) -> Vec3 {
+        let direction = self.center - *origin;
+        let distance_squared = direction.length_squared();
+
+        let uvw = OrthoNormalBasis::from(direction);
+
+        uvw.local(&Vec3::random_to_sphere(self.radius, distance_squared))
     }
 }

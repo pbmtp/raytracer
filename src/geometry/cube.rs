@@ -15,13 +15,16 @@ pub struct Cube {
 
 impl Cube {
     pub fn new(p0: Point3, p1: Point3, c: Color) -> Cube {
+        let mat: Arc<dyn Material> = Arc::new(Lambertian::from(c));
+        Cube::new_from_mat(p0, p1, mat)
+    }
+
+    pub fn new_from_mat(p0: Point3, p1: Point3, mat: Arc<dyn Material>) -> Cube {
         let mut cube = Cube {
             p_min: p0,
             p_max: p1,
             sides: Vec::new(),
         };
-
-        let mat: Arc<dyn Material> = Arc::new(Lambertian::from(c));
 
         cube.sides.push(Box::new(XyRect {
             x0: p0.x(),

@@ -2,7 +2,7 @@ use crate::camera::ray::Ray;
 use crate::hittable::HitRecord;
 use crate::vec3::{Color, Vec3};
 
-use super::{Material, Scatter};
+use super::{Material, ScatterRecord};
 
 pub struct Metal {
     albedo: Color,
@@ -17,22 +17,14 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
+    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Option<ScatterRecord> {
         let reflected = Vec3::reflect(&ray.direction().to_unit_vector(), &hr.get_normal());
-        let scattered = Ray::new(
+        let specular_ray = Ray::new(
             hr.get_p(),
             reflected + self.fuzz * Vec3::random_in_unit_sphere(),
             ray.time(),
         );
 
-        Scatter {
-            attenuation: self.albedo,
-            scattered: if scattered.direction().dot(hr.get_normal()) > 0.0 {
-                Some(scattered)
-            } else {
-                None
-            },
-            pdf: 1.0,
-        }
+        Some(ScatterRecord::specular(&self.albedo, &specular_ray))
     }
 }

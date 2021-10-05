@@ -18,9 +18,11 @@ Fully implemented.
 
 ## [Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
 
-In progress.
+Fully implemented.
 
 ![Cornell box with importance sampling](render/book3.png)
+
+![Cornell box with glass sphere and importance sampling](render/book3-glass.png)
 
 ## Rust specificities
 

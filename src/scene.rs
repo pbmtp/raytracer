@@ -42,6 +42,8 @@ pub enum SceneKind {
     CornellBox,
     CornellBoxSmoke,
     FinalScene,
+    CornellBoxMetal,
+    CornellBoxGlassSphere,
 }
 
 pub struct Scene {
@@ -55,7 +57,10 @@ pub struct Scene {
 impl Config {
     fn new(kind: &SceneKind, moving: bool) -> Config {
         match kind {
-            SceneKind::CornellBox | SceneKind::CornellBoxSmoke => {
+            SceneKind::CornellBox
+            | SceneKind::CornellBoxSmoke
+            | SceneKind::CornellBoxMetal
+            | SceneKind::CornellBoxGlassSphere => {
                 let ratio: f64 = 1.0;
                 let width: usize = 600; // def: 600
                 let height: usize = (width as f64 / ratio) as usize;
@@ -124,21 +129,31 @@ impl Scene {
         // Camera
         let lookfrom = match kind {
             SceneKind::SimpleLight => Point3::new(26.0, 3.0, 6.0),
-            SceneKind::CornellBox | SceneKind::CornellBoxSmoke => Point3::new(278.0, 278.0, -800.0),
+            SceneKind::CornellBox
+            | SceneKind::CornellBoxSmoke
+            | SceneKind::CornellBoxMetal
+            | SceneKind::CornellBoxGlassSphere => Point3::new(278.0, 278.0, -800.0),
             SceneKind::FinalScene => Point3::new(478.0, 278.0, -600.0),
             _ => Point3::new(13.0, 2.0, 3.0),
         };
 
         let lookat = match kind {
             SceneKind::SimpleLight => Point3::new(0.0, 2.0, 0.0),
-            SceneKind::CornellBox | SceneKind::CornellBoxSmoke => Point3::new(278.0, 278.0, 0.0),
+            SceneKind::CornellBox
+            | SceneKind::CornellBoxSmoke
+            | SceneKind::CornellBoxMetal
+            | SceneKind::CornellBoxGlassSphere => Point3::new(278.0, 278.0, 0.0),
             SceneKind::FinalScene => Point3::new(278.0, 278.0, 0.0),
             _ => Point3::zero(),
         };
 
         let vup = Vec3::new(0.0, 1.0, 0.0);
         let vfov = match kind {
-            SceneKind::CornellBox | SceneKind::CornellBoxSmoke | SceneKind::FinalScene => 40.0,
+            SceneKind::CornellBox
+            | SceneKind::CornellBoxSmoke
+            | SceneKind::CornellBoxMetal
+            | SceneKind::CornellBoxGlassSphere
+            | SceneKind::FinalScene => 40.0,
             _ => 20.0,
         };
         let dist_to_focus = 10.0;
@@ -163,6 +178,8 @@ impl Scene {
             SceneKind::SimpleLight
             | SceneKind::CornellBox
             | SceneKind::CornellBoxSmoke
+            | SceneKind::CornellBoxMetal
+            | SceneKind::CornellBoxGlassSphere
             | SceneKind::FinalScene => Color::zero(),
             _ => Color::new(0.7, 0.8, 1.0),
         };
@@ -186,9 +203,194 @@ impl Scene {
             SceneKind::CornellBox => scene.create_cornell_box(),
             SceneKind::CornellBoxSmoke => scene.create_cornell_box_smoke(),
             SceneKind::FinalScene => scene.create_final_scene(filename),
+            SceneKind::CornellBoxMetal => scene.create_cornell_box_metal(),
+            SceneKind::CornellBoxGlassSphere => scene.create_cornell_box_glass_sphere(),
         }
 
         scene
+    }
+
+    fn create_cornell_box_glass_sphere(&mut self) {
+        let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
+        let white: Arc<dyn Material> = Arc::new(Lambertian::from(Color::new(0.73, 0.73, 0.73)));
+        let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
+        let light: Arc<dyn Material> = Arc::new(DiffuseLight::from(Color::new(15.0, 15.0, 15.0)));
+        let glass: Arc<dyn Material> = Arc::new(Dielectric::new(1.5));
+
+        // The Box itself
+        self.world.push(Box::new(YzRect {
+            y0: 0.0,
+            y1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 555.0,
+            material: Arc::new(green),
+        }));
+        self.world.push(Box::new(YzRect {
+            y0: 0.0,
+            y1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 0.0,
+            material: Arc::new(red),
+        }));
+
+        self.world.push(Box::new(FlipNormals::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        })));
+
+        self.world.push(Box::new(XzRect {
+            x0: 0.0,
+            x1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 0.0,
+            material: white.clone(),
+        }));
+        self.world.push(Box::new(XzRect {
+            x0: 0.0,
+            x1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 555.0,
+            material: white.clone(),
+        }));
+
+        self.world.push(Box::new(XyRect {
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 555.0,
+            material: white.clone(),
+        }));
+
+        // The inner rectangular boxes
+        let b = Cube::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 330.0, 165.0),
+            Color::new(0.73, 0.73, 0.73),
+        );
+        let r = RotateY::new(b, 15.0);
+        let t = Translate::new(r, Vec3::new(265.0, 0.0, 295.0));
+        self.world.push(Box::new(t));
+
+        self.world.push(Box::new(Sphere {
+            center: Point3::new(190.0, 90.0, 190.0),
+            radius: 90.0,
+            material: glass.clone(),
+        }));
+
+        // the lights
+        self.light.push(Box::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        }));
+
+        self.light.push(Box::new(Sphere {
+            center: Point3::new(190.0, 90.0, 190.0),
+            radius: 90.0,
+            material: light.clone(),
+        }));
+    }
+
+    fn create_cornell_box_metal(&mut self) {
+        let red = Lambertian::from(Color::new(0.65, 0.05, 0.05));
+        let white: Arc<dyn Material> = Arc::new(Lambertian::from(Color::new(0.73, 0.73, 0.73)));
+        let green = Lambertian::from(Color::new(0.12, 0.45, 0.15));
+        let light: Arc<dyn Material> = Arc::new(DiffuseLight::from(Color::new(15.0, 15.0, 15.0)));
+        let aluminum: Arc<dyn Material> = Arc::new(Metal::new(Color::new(0.8, 0.85, 0.88), 0.0));
+
+        // The Box itself
+        self.world.push(Box::new(YzRect {
+            y0: 0.0,
+            y1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 555.0,
+            material: Arc::new(green),
+        }));
+        self.world.push(Box::new(YzRect {
+            y0: 0.0,
+            y1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 0.0,
+            material: Arc::new(red),
+        }));
+
+        self.world.push(Box::new(FlipNormals::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        })));
+
+        self.world.push(Box::new(XzRect {
+            x0: 0.0,
+            x1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 0.0,
+            material: white.clone(),
+        }));
+        self.world.push(Box::new(XzRect {
+            x0: 0.0,
+            x1: 555.0,
+            z0: 0.0,
+            z1: 555.0,
+            k: 555.0,
+            material: white.clone(),
+        }));
+
+        self.world.push(Box::new(XyRect {
+            x0: 0.0,
+            x1: 555.0,
+            y0: 0.0,
+            y1: 555.0,
+            k: 555.0,
+            material: white.clone(),
+        }));
+
+        // The inner rectangular boxes
+        let b = Cube::new_from_mat(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 330.0, 165.0),
+            aluminum.clone(),
+        );
+        let r = RotateY::new(b, 15.0);
+        let t = Translate::new(r, Vec3::new(265.0, 0.0, 295.0));
+        self.world.push(Box::new(t));
+
+        let b = Cube::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 165.0, 165.0),
+            Color::new(0.73, 0.73, 0.73),
+        );
+        let r = RotateY::new(b, -18.0);
+        let t = Translate::new(r, Vec3::new(130.0, 0.0, 65.0));
+        self.world.push(Box::new(t));
+
+        // the lights
+        self.light.push(Box::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        }));
     }
 
     fn create_final_scene(&mut self, filename: &str) {
@@ -363,15 +565,6 @@ impl Scene {
             material: light.clone(),
         })));
 
-        self.light.push(Box::new(XzRect {
-            x0: 213.0,
-            x1: 343.0,
-            z0: 227.0,
-            z1: 332.0,
-            k: 554.0,
-            material: light.clone(),
-        }));
-
         self.world.push(Box::new(XzRect {
             x0: 0.0,
             x1: 555.0,
@@ -426,6 +619,16 @@ impl Scene {
             phase_function: Arc::new(Isotropic::from(Color::new(1.0, 1.0, 1.0))),
         };
         self.world.push(Box::new(smoke));
+
+        // the lights
+        self.light.push(Box::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        }));
     }
 
     fn create_cornell_box(&mut self) {
@@ -460,15 +663,6 @@ impl Scene {
             k: 554.0,
             material: light.clone(),
         })));
-
-        self.light.push(Box::new(XzRect {
-            x0: 213.0,
-            x1: 343.0,
-            z0: 227.0,
-            z1: 332.0,
-            k: 554.0,
-            material: light.clone(),
-        }));
 
         self.world.push(Box::new(XzRect {
             x0: 0.0,
@@ -514,6 +708,16 @@ impl Scene {
         let r = RotateY::new(b, -18.0);
         let t = Translate::new(r, Vec3::new(130.0, 0.0, 65.0));
         self.world.push(Box::new(t));
+
+        // the lights
+        self.light.push(Box::new(XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            material: light.clone(),
+        }));
     }
 
     fn create_simple_light(&mut self) {
