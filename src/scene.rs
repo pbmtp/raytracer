@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use std::sync::Arc;
 
 use crate::camera::camera::Camera;
@@ -44,6 +45,27 @@ pub enum SceneKind {
     FinalScene,
     CornellBoxMetal,
     CornellBoxGlassSphere,
+}
+
+impl FromStr for SceneKind {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "RandomUniform" => Ok(Self::RandomUniform),
+            "RandomChecker" => Ok(Self::RandomChecker),
+            "TwoCheckerSpheres" => Ok(Self::TwoCheckerSpheres),
+            "TwoPerlinSpheres" => Ok(Self::TwoPerlinSpheres),
+            "ImageSphere" => Ok(Self::ImageSphere),
+            "SimpleLight" => Ok(Self::SimpleLight),
+            "CornellBox" => Ok(Self::CornellBox),
+            "CornellBoxSmoke" => Ok(Self::CornellBoxSmoke),
+            "FinalScene" => Ok(Self::FinalScene),
+            "CornellBoxMetal" => Ok(Self::CornellBoxMetal),
+            "CornellBoxGlassSphere" => Ok(Self::CornellBoxGlassSphere),
+            _ => Err("expecting: RandomUniform or RandomChecker or TwoCheckerSpheres or TwoPerlinSpheres or ImageSphere or SimpleLight or CornellBox or CornellBoxSmoke or FinalScene or CornellBoxMetal or CornellBoxGlassSphere"),
+        }
+    }
 }
 
 pub struct Scene {

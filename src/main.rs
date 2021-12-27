@@ -4,6 +4,7 @@
 // https://raytracing.github.io/books/RayTracingTheNextWeek.html
 // IN PROGRESS https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
 
+use clap::Parser;
 use indicatif::HumanDuration;
 
 use std::time::Instant;
@@ -23,11 +24,38 @@ mod vec3;
 use renderer::{render, RendererKind};
 use scene::{Scene, SceneKind};
 
+#[derive(Parser, Debug)]
+#[clap(about, version, author)]
+struct Args {
+    /// Name of the output file
+    #[clap(short, long, default_value = "out-test.png")]
+    output: String,
+
+    /// Name of the renderer to use
+    #[clap(short, long, parse(try_from_str), default_value = "ParallelCrossbeam")]
+    renderer: RendererKind,
+
+    /// Name of the scene
+    #[clap(
+        short,
+        long,
+        parse(try_from_str),
+        default_value = "CornellBoxGlassSphere"
+    )]
+    scene: SceneKind,
+
+    /// Make objects move
+    #[clap(short, long)]
+    moving: bool,
+}
+
 fn main() {
-    let scene = Scene::new(false, SceneKind::CornellBoxGlassSphere, "data/1k/earth.jpg");
+    let args = Args::parse();
+
+    let scene = Scene::new(args.moving, args.scene, "data/1k/earth.jpg");
 
     let start = Instant::now();
-    render(&scene, RendererKind::ParallelCrossbeam, "out-test.png");
+    render(&scene, args.renderer, &args.output);
     println!(
         "Time elapsed rendering  scene is: {}",
         HumanDuration(start.elapsed())

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::camera::ray::Ray;
@@ -18,10 +20,24 @@ pub mod sequential;
 
 pub(crate) const BYTES_PER_PIXEL: usize = 3;
 
+#[derive(Debug)]
 pub enum RendererKind {
     ParallelCrossbeam,
     ParallelRayon,
     Sequential,
+}
+
+impl FromStr for RendererKind {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "ParallelCrossbeam" => Ok(Self::ParallelCrossbeam),
+            "ParallelRayon" => Ok(Self::ParallelRayon),
+            "Sequential" => Ok(Self::Sequential),
+            _ => Err("expecting: ParallelCrossbeam or ParallelRayon or Sequential"),
+        }
+    }
 }
 
 pub(crate) fn ray_color(
@@ -46,7 +62,7 @@ pub(crate) fn ray_color(
             match srec {
                 ScatterRecord::Specular { attenuation, ray } => {
                     return attenuation * ray_color(&ray, background, world, light, depth - 1);
-                },
+                }
                 ScatterRecord::Diffuse { attenuation, pdf } => {
                     let light_pdf = HittablePdf::new(light, hr.get_p());
                     let mixed_pdf = MixturePdf::new(light_pdf, pdf);
