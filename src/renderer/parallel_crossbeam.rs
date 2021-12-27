@@ -49,7 +49,8 @@ pub(crate) fn render(scene: &Scene, bar: &ProgressBar, pixels: &mut Vec<u8>) {
 
                         let r = scene.camera.get_ray(u, v);
 
-                        c += ray_color(&r, &scene.background, &scene.world, &scene.light, max_depth);
+                        c +=
+                            ray_color(&r, &scene.background, &scene.world, &scene.light, max_depth);
                     }
 
                     let avg = c.to_u8_avg_gamma2(samples_per_pixel);

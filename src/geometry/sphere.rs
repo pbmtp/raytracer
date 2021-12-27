@@ -78,7 +78,8 @@ impl Hittable for Sphere {
     fn pdf_value(&self, origin: &Point3, v: &Vec3) -> f64 {
         let ray = Ray::new(*origin, *v, 0.0);
         if let Some(_hr) = self.hit(&ray, 0.001, std::f64::INFINITY) {
-            let cos_theta_max = (1.0 - self.radius.powi(2) / (self.center - *origin).length_squared()).sqrt();
+            let cos_theta_max =
+                (1.0 - self.radius.powi(2) / (self.center - *origin).length_squared()).sqrt();
             let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
 
             return 1.0 / solid_angle;
