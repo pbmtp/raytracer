@@ -32,16 +32,11 @@ struct Args {
     output: String,
 
     /// Name of the renderer to use
-    #[clap(short, long, parse(try_from_str), default_value = "ParallelCrossbeam")]
+    #[clap(short, long, arg_enum, default_value = "parallel-crossbeam")]
     renderer: RendererKind,
 
     /// Name of the scene
-    #[clap(
-        short,
-        long,
-        parse(try_from_str),
-        default_value = "CornellBoxGlassSphere"
-    )]
+    #[clap(short, long, arg_enum, default_value = "cornell-box-glass-sphere")]
     scene: SceneKind,
 
     /// Make objects move

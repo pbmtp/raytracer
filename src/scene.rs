@@ -1,5 +1,8 @@
+use std::fmt::Display;
 use std::str::FromStr;
 use std::sync::Arc;
+
+use clap::{ArgEnum, PossibleValue};
 
 use crate::camera::camera::Camera;
 use crate::geometry::flip_normals::FlipNormals;
@@ -32,7 +35,7 @@ pub struct Config {
     pub time1: f64,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(ArgEnum, Debug, PartialEq, Clone, Copy)]
 pub enum SceneKind {
     RandomUniform,
     RandomChecker,
@@ -48,23 +51,32 @@ pub enum SceneKind {
 }
 
 impl FromStr for SceneKind {
-    type Err = &'static str;
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "RandomUniform" => Ok(Self::RandomUniform),
-            "RandomChecker" => Ok(Self::RandomChecker),
-            "TwoCheckerSpheres" => Ok(Self::TwoCheckerSpheres),
-            "TwoPerlinSpheres" => Ok(Self::TwoPerlinSpheres),
-            "ImageSphere" => Ok(Self::ImageSphere),
-            "SimpleLight" => Ok(Self::SimpleLight),
-            "CornellBox" => Ok(Self::CornellBox),
-            "CornellBoxSmoke" => Ok(Self::CornellBoxSmoke),
-            "FinalScene" => Ok(Self::FinalScene),
-            "CornellBoxMetal" => Ok(Self::CornellBoxMetal),
-            "CornellBoxGlassSphere" => Ok(Self::CornellBoxGlassSphere),
-            _ => Err("expecting: RandomUniform or RandomChecker or TwoCheckerSpheres or TwoPerlinSpheres or ImageSphere or SimpleLight or CornellBox or CornellBoxSmoke or FinalScene or CornellBoxMetal or CornellBoxGlassSphere"),
+        for variant in Self::value_variants() {
+            if variant.to_possible_value().unwrap().matches(s, false) {
+                return Ok(*variant);
+            }
         }
+        Err(format!("Invalid variant: {}", s))
+    }
+}
+
+impl Display for SceneKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.to_possible_value()
+            .expect("no values are skipped")
+            .get_name()
+            .fmt(f)
+    }
+}
+
+impl SceneKind {
+    pub fn possible_values() -> impl Iterator<Item = PossibleValue<'static>> {
+        Self::value_variants()
+            .iter()
+            .filter_map(ArgEnum::to_possible_value)
     }
 }
 

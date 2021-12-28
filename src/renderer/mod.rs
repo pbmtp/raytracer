@@ -1,5 +1,7 @@
+use std::fmt::Display;
 use std::str::FromStr;
 
+use clap::{ArgEnum, PossibleValue};
 use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::camera::ray::Ray;
@@ -20,7 +22,7 @@ pub mod sequential;
 
 pub(crate) const BYTES_PER_PIXEL: usize = 3;
 
-#[derive(Debug)]
+#[derive(ArgEnum, Debug, Clone, Copy)]
 pub enum RendererKind {
     ParallelCrossbeam,
     ParallelRayon,
@@ -28,15 +30,32 @@ pub enum RendererKind {
 }
 
 impl FromStr for RendererKind {
-    type Err = &'static str;
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "ParallelCrossbeam" => Ok(Self::ParallelCrossbeam),
-            "ParallelRayon" => Ok(Self::ParallelRayon),
-            "Sequential" => Ok(Self::Sequential),
-            _ => Err("expecting: ParallelCrossbeam or ParallelRayon or Sequential"),
+        for variant in Self::value_variants() {
+            if variant.to_possible_value().unwrap().matches(s, false) {
+                return Ok(*variant);
+            }
         }
+        Err(format!("Invalid variant: {}", s))
+    }
+}
+
+impl Display for RendererKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.to_possible_value()
+            .expect("no values are skipped")
+            .get_name()
+            .fmt(f)
+    }
+}
+
+impl RendererKind {
+    pub fn possible_values() -> impl Iterator<Item = PossibleValue<'static>> {
+        Self::value_variants()
+            .iter()
+            .filter_map(ArgEnum::to_possible_value)
     }
 }
 
