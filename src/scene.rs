@@ -456,15 +456,23 @@ impl Scene {
             self.cfg.time1,
         )));
 
-        // FIXME light
-        let light = DiffuseLight::from(Color::new(7.0, 7.0, 7.0));
-        self.world.push(Box::new(XzRect {
+        // light
+        let light: Arc<dyn Material> = Arc::new(DiffuseLight::from(Color::new(7.0, 7.0, 7.0)));
+        self.world.push(Box::new(FlipNormals::new(XzRect {
             x0: 123.0,
             x1: 423.0,
             z0: 147.0,
             z1: 412.0,
             k: 554.0,
-            material: Arc::new(light),
+            material: light.clone(),
+        })));
+        self.light.push(Box::new(XzRect {
+            x0: 123.0,
+            x1: 423.0,
+            z0: 147.0,
+            z1: 412.0,
+            k: 554.0,
+            material: light.clone(),
         }));
 
         // moving sphere
@@ -778,7 +786,7 @@ impl Scene {
         }));
 
         // Rectangle light
-        let difflight = DiffuseLight::from(Color::new(4.0, 4.0, 4.0));
+        let light: Arc<dyn Material> = Arc::new(DiffuseLight::from(Color::new(4.0, 4.0, 4.0)));
 
         self.world.push(Box::new(XyRect {
             x0: 3.0,
@@ -786,7 +794,16 @@ impl Scene {
             y0: 1.0,
             y1: 3.0,
             k: -2.0,
-            material: Arc::new(difflight),
+            material: light.clone(),
+        }));
+
+        self.light.push(Box::new(XyRect {
+            x0: 3.0,
+            x1: 5.0,
+            y0: 1.0,
+            y1: 3.0,
+            k: -2.0,
+            material: light.clone(),
         }));
     }
 
