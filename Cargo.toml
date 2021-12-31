@@ -9,7 +9,7 @@ edition = "2018"
 clap = { version = "3.0.0-rc.8", features = ["derive"] }
 crossbeam = "0.8.1"
 crossbeam-channel = "0.5.1"
-image = { version = "0.23", default-features = false, features = ["png"] }
+image = { version = "0.23", default-features = false, features = ["png", "jpeg"] }
 indicatif = "0.16"
 num_cpus = "1.13.0"
 rand = "0.8"
