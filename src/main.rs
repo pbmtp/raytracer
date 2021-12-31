@@ -42,12 +42,31 @@ struct Args {
     /// Make objects move
     #[clap(short, long)]
     moving: bool,
+
+    /// Override image width
+    #[clap(short = 'W', long)]
+    width: Option<usize>,
+
+    /// Override image height
+    #[clap(short = 'H', long)]
+    height: Option<usize>,
+
+    /// Override samples per pixel count
+    #[clap(short = 'S', long)]
+    samples_per_pixel: Option<u32>,
 }
 
 fn main() {
     let args = Args::parse();
 
-    let scene = Scene::new(args.moving, args.scene, "data/1k/earth.jpg");
+    let scene = Scene::new(
+        args.moving,
+        args.scene,
+        "data/1k/earth.jpg",
+        args.width,
+        args.height,
+        args.samples_per_pixel,
+    );
 
     let start = Instant::now();
     render(&scene, args.renderer, &args.output);

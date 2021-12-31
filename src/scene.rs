@@ -89,16 +89,22 @@ pub struct Scene {
 }
 
 impl Config {
-    fn new(kind: &SceneKind, moving: bool) -> Config {
+    fn new(
+        kind: &SceneKind,
+        moving: bool,
+        owidth: Option<usize>,
+        oheight: Option<usize>,
+        osamples: Option<u32>,
+    ) -> Config {
         match kind {
             SceneKind::CornellBox
             | SceneKind::CornellBoxSmoke
             | SceneKind::CornellBoxMetal
             | SceneKind::CornellBoxGlassSphere => {
                 let ratio: f64 = 1.0;
-                let width: usize = 600; // def: 600
-                let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 100; // def: 200
+                let width: usize = owidth.unwrap_or(600); // def: 600
+                let height: usize = oheight.unwrap_or((width as f64 / ratio) as usize);
+                let samples_per_pixel: u32 = osamples.unwrap_or(100); // def: 200
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = if moving { 1.0 } else { 0.0 };
@@ -115,9 +121,9 @@ impl Config {
             }
             SceneKind::FinalScene => {
                 let ratio: f64 = 1.0;
-                let width: usize = 1000;
-                let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 1000; /* <100: 1min, <500: 8mins, <1000: 15mins, 10K: 4hours */
+                let width: usize = owidth.unwrap_or(1000);
+                let height: usize = oheight.unwrap_or((width as f64 / ratio) as usize);
+                let samples_per_pixel: u32 = osamples.unwrap_or(1000); /* <100: 1min, <500: 8mins, <1000: 15mins, 10K: 4hours */
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = 1.0;
@@ -134,9 +140,9 @@ impl Config {
             }
             _ => {
                 let ratio: f64 = 3.0 / 2.0;
-                let width: usize = 1200;
-                let height: usize = (width as f64 / ratio) as usize;
-                let samples_per_pixel: u32 = 500; // def: 500
+                let width: usize = owidth.unwrap_or(1200);
+                let height: usize = oheight.unwrap_or((width as f64 / ratio) as usize);
+                let samples_per_pixel: u32 = osamples.unwrap_or(500); // def: 500
                 let max_depth: u32 = 50;
                 let time0 = 0.0;
                 let time1 = if moving { 1.0 } else { 0.0 };
@@ -156,9 +162,16 @@ impl Config {
 }
 
 impl Scene {
-    pub fn new(moving: bool, kind: SceneKind, filename: &str) -> Scene {
+    pub fn new(
+        moving: bool,
+        kind: SceneKind,
+        filename: &str,
+        owidth: Option<usize>,
+        oheight: Option<usize>,
+        osamples: Option<u32>,
+    ) -> Scene {
         // Image config
-        let cfg = Config::new(&kind, moving);
+        let cfg = Config::new(&kind, moving, owidth, oheight, osamples);
 
         // Camera
         let lookfrom = match kind {
