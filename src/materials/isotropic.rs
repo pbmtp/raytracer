@@ -1,7 +1,12 @@
+use std::f64::consts::PI;
+
+use crate::camera::ray::Ray;
+use crate::hittable::HitRecord;
+use crate::pdf::sphere::SpherePdf;
 use crate::texture::{solid::SolidTexture, Texture};
 use crate::vec3::Color;
 
-use super::Material;
+use super::{Material, ScatterRecord};
 
 pub struct Isotropic {
     albedo: Box<dyn Texture>,
@@ -16,18 +21,14 @@ impl From<Color> for Isotropic {
 }
 
 impl Material for Isotropic {
-    /* FIXME see dev_major branch */
-    /*
-    fn scatter(&self, ray: &Ray, hr: &HitRecord) -> Scatter {
-        Scatter {
-            attenuation: self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p()),
-            scattered: Some(Ray::new(
-                hr.get_p(),
-                Vec3::random_in_unit_sphere(),
-                ray.time(),
-            )),
-            pdf: 1.0,
-        }
+    fn scatter(&self, _ray: &Ray, hr: &HitRecord) -> Option<ScatterRecord> {
+        Some(ScatterRecord::diffuse(
+            &self.albedo.value(hr.get_u(), hr.get_v(), &hr.get_p()),
+            Box::new(SpherePdf {}),
+        ))
     }
-    */
+
+    fn scattering_pdf(&self, _ray: &Ray, _hr: &HitRecord, _scattered: &Ray) -> f64 {
+        1.0 / (4.0 * PI)
+    }
 }
