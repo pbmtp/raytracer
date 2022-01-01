@@ -28,9 +28,10 @@ Fully implemented.
 
 - Use dynamic traits for Texture and Materials.
 - Multi-threaded using [rayon](https://docs.rs/rayon/1.5.1/rayon/).
+- Multi-threaded using [crossbeam](https://docs.rs/crossbeam/latest/crossbeam/).
 
 ## Todo list
 
-- do real time render using pixels / minifb
+- do real time render preview using pixels / minifb
 - incremental rendering
-- update to soo to be released version 4.0.0 of books
+- update to soon to be released version 4.0.0 of books
