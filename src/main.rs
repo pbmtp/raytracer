@@ -2,7 +2,7 @@
 
 // https://raytracing.github.io/books/RayTracingInOneWeekend.html
 // https://raytracing.github.io/books/RayTracingTheNextWeek.html
-// IN PROGRESS https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
+// https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html
 
 use clap::Parser;
 use indicatif::HumanDuration;
@@ -28,31 +28,31 @@ use scene::{Scene, SceneKind};
 #[clap(about, version, author)]
 struct Args {
     /// Name of the output file
-    #[clap(short, long, default_value = "out-test.png")]
+    #[clap(short, long, help_heading = "CONFIG", default_value = "out-test.png")]
     output: String,
 
     /// Name of the renderer to use
-    #[clap(short, long, arg_enum, default_value = "parallel-crossbeam")]
+    #[clap(short, long, arg_enum, help_heading = "CONFIG", default_value = "parallel-crossbeam")]
     renderer: RendererKind,
 
     /// Name of the scene
-    #[clap(short, long, arg_enum, default_value = "cornell-box-glass-sphere")]
+    #[clap(short, long, arg_enum, help_heading = "CONFIG", default_value = "cornell-box-glass-sphere")]
     scene: SceneKind,
 
     /// Make objects move
     #[clap(short, long)]
     moving: bool,
 
-    /// Override image width
-    #[clap(short = 'W', long)]
+    /// Image width
+    #[clap(short = 'W', long, help_heading = "OVERRIDE")]
     width: Option<usize>,
 
-    /// Override image height
-    #[clap(short = 'H', long)]
+    /// Image height
+    #[clap(short = 'H', long, help_heading = "OVERRIDE")]
     height: Option<usize>,
 
-    /// Override samples per pixel count
-    #[clap(short = 'S', long)]
+    /// Number of samples per pixel
+    #[clap(short = 'S', long, help_heading = "OVERRIDE")]
     samples_per_pixel: Option<u32>,
 }
 
